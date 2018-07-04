@@ -316,7 +316,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/07/03/hello-world/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/07/04/Sharding-Jdbc-初探-一-JDBC/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="斑马">
@@ -335,8 +335,8 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2018/07/03/hello-world/" itemprop="url">
-                  Hello World
+                <a class="post-title-link" href="/2018/07/04/Sharding-Jdbc-初探-一-JDBC/" itemprop="url">
+                  Sharding Jdbc 初探(一) : JDBC
                 </a>
               
             
@@ -362,24 +362,12 @@
                 
               
 
-              <time title="创建时间：2018-07-03 22:48:17" itemprop="dateCreated datePublished" datetime="2018-07-03T22:48:17+08:00">2018-07-03</time>
+              <time title="创建时间：2018-07-04 23:39:48 / 修改时间：23:41:00" itemprop="dateCreated datePublished" datetime="2018-07-04T23:39:48+08:00">2018-07-04</time>
             
 
             
               
 
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">更新于</span>
-                
-                <time title="修改时间：2018-07-04 00:20:29" itemprop="dateModified" datetime="2018-07-04T00:20:29+08:00">2018-07-04</time>
               
             
           </span>
@@ -396,7 +384,7 @@
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/hello/" itemprop="url" rel="index"><span itemprop="name">hello</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/并发/" itemprop="url" rel="index"><span itemprop="name">并发</span></a></span>
 
                 
                 
@@ -432,15 +420,12 @@
       
         
           
-            <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>
+            <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>在现实的业务场景中，随着用户量的增长，我们系统中的数据量会逐渐增多。特别是对于互联网应用，其中的代表为电商应用,，它们的数据量很大，并且增长迅速。当数据库单表的数据如果达到了千万级，数据库的吞吐能力就会受到极大的影响。在这种情况下，我们通常会做数据库分库分表，给数据库降低负载，并提高其并发能力。</p>
+<p>Sharding-JDBC是数据库分库分表中间件，提供了数据分片，读写分离，柔性事务。并且透明化分库分表所带来的影响，让使用方尽量像使用一个数据库一样使用水平拆分之后的数据库。</p>
+<p>在系统的学习Sharding-JDBC之前，我们首先应该回顾一下JavaEE的标准JDBC，了解一下JDBC所定义的操作数据库的规范。这样会有助于我们更加快速的入门Sharding-JDBC，并且更容易的帮助我们去理解，Sharding-JDBC是如何通过JDBC去在查询数据库的时候根据策略路由，并最终拿到我们想要的数据的。</p>
+<h2 id="JDBC"><a href="#JDBC" class="headerlink" title="JDBC"></a>JDBC</h2><h3 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h3><p>JDBC（Java DataBase Connectivity,java数据库连接）是一种用于执行SQL语句的Java API，可以为多种关系数据库提供统一访问，它由一组用Java语言编写的类和接口组成。JDBC提供了一种基准，据此可以构建更高级的工具和接口，使数据库开发人员能够编写数据库应用程序。</p>
+<p>JDBC是JavaEE的核心标准，Java提供接口。由各大数据库厂商提供接口的实现。</p>
+<h3 id="核心类"><a href="#核心类" class="headerlink" title="核心类"></a>核心类</h3><p><strong>Driver.class</strong> : Driver类由数据库厂商提供。我们需要使用数据库厂商提供的类来获取数据库驱动。<br><strong>Connection.Java</strong> : Connection是由Driver类生成，用于生成与数据库通讯的Statement。<br><strong>Statement.java </strong>: Statement负责与数据库交互，传递sql语句，并获取执行结果。<br><strong>ResultSet.java</strong> : ResultSet中包含了我们sql语句的执行结果。</p>
 
           
         
