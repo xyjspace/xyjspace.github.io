@@ -345,7 +345,7 @@
         
             <a class="post-title-link" href="/2018/07/08/Sharding-Jdbc-初探-二-mybatis/" itemprop="url">
               
-                <span itemprop="name">Sharding-Jdbc 初探 (二) :mybatis</span>
+                <span itemprop="name">Sharding Jdbc 初探 (二) :mybatis</span>
               
             </a>
         
@@ -690,6 +690,30 @@
 
 
 
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'rYwUgHvNR0gs6G3tecTA4TGB-gzGzoHsz',
+        appKey: 'fWcscBws5bQ6QjCfC9S7knPc',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
 
 
 
