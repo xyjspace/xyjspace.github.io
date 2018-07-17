@@ -108,23 +108,24 @@
 
 
 
-  <meta name="description" content="你不要睡着了">
-<meta property="og:type" content="website">
-<meta property="og:title" content="斑马のCODE_HOME">
-<meta property="og:url" content="http://yoursite.com/categories/数据库中间件/index.html">
+  <meta name="description" content="从这篇文章开始，我们开始分析Sharding-JDBC的源码，并尽力理解作者的设计思路。 抛开分库不说，假设我们只做了分表:order表根据order_id拆分成了两张表  order_0 order_1">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Sharding Jdbc 初探 (四) : Sharding-JDBC Parsing模块">
+<meta property="og:url" content="http://yoursite.com/2018/07/16/Sharding-Jdbc-初探-四-Sharding-JDBC-Parsing模块/index.html">
 <meta property="og:site_name" content="斑马のCODE_HOME">
-<meta property="og:description" content="你不要睡着了">
+<meta property="og:description" content="从这篇文章开始，我们开始分析Sharding-JDBC的源码，并尽力理解作者的设计思路。 抛开分库不说，假设我们只做了分表:order表根据order_id拆分成了两张表  order_0 order_1">
 <meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-07-17T14:41:42.038Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="斑马のCODE_HOME">
-<meta name="twitter:description" content="你不要睡着了">
+<meta name="twitter:title" content="Sharding Jdbc 初探 (四) : Sharding-JDBC Parsing模块">
+<meta name="twitter:description" content="从这篇文章开始，我们开始分析Sharding-JDBC的源码，并尽力理解作者的设计思路。 抛开分库不说，假设我们只做了分表:order表根据order_id拆分成了两张表  order_0 order_1">
 
 
 
 
 
 
-  <link rel="canonical" href="http://yoursite.com/categories/数据库中间件/"/>
+  <link rel="canonical" href="http://yoursite.com/2018/07/16/Sharding-Jdbc-初探-四-Sharding-JDBC-Parsing模块/"/>
 
 
 
@@ -134,7 +135,7 @@
   };
 </script>
 
-  <title>分类: 数据库中间件 | 斑马のCODE_HOME</title>
+  <title>Sharding Jdbc 初探 (四) : Sharding-JDBC Parsing模块 | 斑马のCODE_HOME</title>
   
 
 
@@ -181,7 +182,7 @@
     
   
 
-  <div class="container sidebar-position-right ">
+  <div class="container sidebar-position-right page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -246,7 +247,7 @@
         
         
           
-          <li class="menu-item menu-item-categories menu-item-active">
+          <li class="menu-item menu-item-categories">
     <a href="/categories/" rel="section">
       <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
   </li>
@@ -275,31 +276,6 @@
   
     
 
-    
-    
-      
-      
-    
-      
-      
-    
-      
-      
-    
-      
-      
-    
-      
-      
-    
-      
-      
-    
-    
-
-  
-
-
   
 
   
@@ -324,59 +300,195 @@
           <div id="content" class="content">
             
 
-  
-  
-  
-  <div class="post-block category">
+  <div id="posts" class="posts-expand">
+    
 
-    <div id="posts" class="posts-collapse">
-      <div class="collection-title">
-        <h1>数据库中间件<small>分类</small>
-        </h1>
-      </div>
+  
 
-      
-        
+  
+  
+  
+
+  
 
   <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/07/16/Sharding-Jdbc-初探-四-Sharding-JDBC-Parsing模块/">
 
-      <h2 class="post-title">
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="斑马">
+      <meta itemprop="description" content="你不要睡着了">
+      <meta itemprop="image" content="/uploads/head_image.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="斑马のCODE_HOME">
+    </span>
+
+    
+      <header class="post-header">
+
         
-            <a class="post-title-link" href="/2018/07/04/Sharding-Jdbc-初探-一-JDBC/" itemprop="url">
-              
-                <span itemprop="name">Sharding Jdbc 初探(一) : JDBC</span>
-              
-            </a>
         
-      </h2>
+          <h1 class="post-title" itemprop="name headline">Sharding Jdbc 初探 (四) : Sharding-JDBC Parsing模块
+              
+            
+          </h1>
+        
 
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2018-07-04T23:39:48+08:00"
-              content="2018-07-04" >
-          07-04
-        </time>
-      </div>
+        <div class="post-meta">
+          <span class="post-time">
 
-    </header>
-  </article>
+            
+            
+            
 
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-07-16 10:09:20" itemprop="dateCreated datePublished" datetime="2018-07-16T10:09:20+08:00">2018-07-16</time>
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/07/16/Sharding-Jdbc-初探-四-Sharding-JDBC-Parsing模块/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2018/07/16/Sharding-Jdbc-初探-四-Sharding-JDBC-Parsing模块/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>从这篇文章开始，我们开始分析Sharding-JDBC的源码，并尽力理解作者的设计思路。</p>
+<p>抛开分库不说，假设我们只做了分表:<br>order表根据order_id拆分成了两张表</p>
+<ul>
+<li>order_0</li>
+<li>order_1<a id="more"></a>
+</li>
+</ul>
+<p>我们有一个sql:<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">insert</span>  <span class="keyword">into</span> <span class="keyword">order</span> (order_id, order_info, <span class="built_in">date</span>)  <span class="keyword">values</span>(<span class="string">"4654654564878"</span>, <span class="string">"xxx"</span>, <span class="literal">null</span>);</span><br></pre></td></tr></table></figure></p>
+<p>这个sql最终是要将<strong> order</strong> 改成 <strong>order_0，或者 order_1</strong>的。</p>
+<p>在更改sql的过程中，我们必须要拿到sql中所查询的表，并拿到order_id。只有拿到这两个值，我们才能找到对应的路由策略，从而路由真实的表。</p>
+<p>那么我们必须要有一个sql解析的功能，只有这样sharding-jdbc才可以对sql语句进行正确的解析。而且这个解析功能还必须要支持各种数据库的方言。</p>
+<p>为了更容易理解这个解析的必要性，在这里再举一个例子，假设把上边的sql改成这样:<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">insert</span>  <span class="keyword">into</span> <span class="keyword">order</span> (order_id, order_info, <span class="built_in">date</span>)  <span class="keyword">values</span>(<span class="number">123456789</span>, <span class="string">"order_id=987654321"</span>, <span class="literal">null</span>);</span><br></pre></td></tr></table></figure></p>
+<p>那么我们怎么去找到真实的order_id的值呢？</p>
+<p>这篇文章我们主要分析Sharding-JDBC中的sql解析模块： <strong>parsing</strong></p>
+<p>ShardingPrepareStatement:<br>    PreparedStatementRoutingEngine(sql, shardingContext)<br>        SQLRouter：SQLRouterFactory.createSQLRouter(shardingContext)<br>            PardingSQLRouter(shardingContext)</p>
+<p>PardingSQLRouter.parse()<br>    SQLParsingEngine(databaseType, logicSQL, shardingRule);<br>        LexerEngine:LexerEngineFactory.newInstance(dbType, sql);<br>            LexerEngine(new MySQLLexer(sql))</p>
+<p>PardingSQLRouter.rout(logicSQL,parameters,sqlStatement)</p>
+<p>BaseStatementUnit</p>
+<p>PreparedStatementUnit{<br>    SQLExecutionUnit<br>    PreparedStatement<br>}</p>
+<p>SQLExecutionUnit{<br>    String datasource<br>    String sql<br>}</p>
 
       
     </div>
 
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/07/15/年中总结/" rel="next" title="年中总结">
+                <i class="fa fa-chevron-left"></i> 年中总结
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
   </div>
   
   
   
+  </article>
 
-  
 
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
           
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
 
         </div>
         
@@ -632,6 +744,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.3.0"></script>
+
+
 
   
 
