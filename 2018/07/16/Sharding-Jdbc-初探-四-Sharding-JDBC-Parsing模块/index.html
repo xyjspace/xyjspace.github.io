@@ -110,14 +110,14 @@
 
   <meta name="description" content="从这篇文章开始，我们开始分析Sharding-JDBC的源码，并尽力理解作者的设计思路。 抛开分库不说，假设我们只做了分表:order表根据order_id拆分成了两张表  order_0 order_1">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Sharding Jdbc 初探 (四) : Sharding-JDBC Parsing模块">
+<meta property="og:title" content="Sharding Jdbc 初探 (四) : Parsing模块">
 <meta property="og:url" content="http://yoursite.com/2018/07/16/Sharding-Jdbc-初探-四-Sharding-JDBC-Parsing模块/index.html">
 <meta property="og:site_name" content="斑马のCODE_HOME">
 <meta property="og:description" content="从这篇文章开始，我们开始分析Sharding-JDBC的源码，并尽力理解作者的设计思路。 抛开分库不说，假设我们只做了分表:order表根据order_id拆分成了两张表  order_0 order_1">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-07-17T14:50:25.017Z">
+<meta property="og:updated_time" content="2018-08-24T07:38:32.757Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Sharding Jdbc 初探 (四) : Sharding-JDBC Parsing模块">
+<meta name="twitter:title" content="Sharding Jdbc 初探 (四) : Parsing模块">
 <meta name="twitter:description" content="从这篇文章开始，我们开始分析Sharding-JDBC的源码，并尽力理解作者的设计思路。 抛开分库不说，假设我们只做了分表:order表根据order_id拆分成了两张表  order_0 order_1">
 
 
@@ -135,7 +135,7 @@
   };
 </script>
 
-  <title>Sharding Jdbc 初探 (四) : Sharding-JDBC Parsing模块 | 斑马のCODE_HOME</title>
+  <title>Sharding Jdbc 初探 (四) : Parsing模块 | 斑马のCODE_HOME</title>
   
 
 
@@ -333,7 +333,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Sharding Jdbc 初探 (四) : Sharding-JDBC Parsing模块
+          <h1 class="post-title" itemprop="name headline">Sharding Jdbc 初探 (四) : Parsing模块
               
             
           </h1>
@@ -414,12 +414,45 @@
 <p>在更改sql的过程中，我们必须要拿到sql中所查询的表，并拿到order_id。只有拿到这两个值，我们才能找到对应的路由策略，从而路由真实的表。</p>
 <p>那么我们必须要有一个sql解析的功能，只有这样sharding-jdbc才可以对sql语句进行正确的解析。而且这个解析功能还必须要支持各种数据库的方言。</p>
 <p>这篇文章我们主要分析Sharding-JDBC中的sql解析模块： <strong>parsing</strong></p>
-<p>ShardingPrepareStatement:<br>    PreparedStatementRoutingEngine(sql, shardingContext)<br>        SQLRouter：SQLRouterFactory.createSQLRouter(shardingContext)<br>            PardingSQLRouter(shardingContext)</p>
-<p>PardingSQLRouter.parse()<br>    SQLParsingEngine(databaseType, logicSQL, shardingRule);<br>        LexerEngine:LexerEngineFactory.newInstance(dbType, sql);<br>            LexerEngine(new MySQLLexer(sql))</p>
-<p>PardingSQLRouter.rout(logicSQL,parameters,sqlStatement)</p>
-<p>BaseStatementUnit</p>
-<p>PreparedStatementUnit{<br>    SQLExecutionUnit<br>    PreparedStatement<br>}</p>
-<p>SQLExecutionUnit{<br>    String datasource<br>    String sql<br>}</p>
+<p>1.执行PreparedStatementRoutingEngine.route()方法。<br>2.执行ParsingSqlRouter的parse方法。返回值为SQLStatement，该类位于parsing包下。<br>3.创建一个SQLParsingEngine对象，传入databaseType, logicSQL, shardingRule。databaseType属性是在创建ShardingDatasource的时候初始化的。具体如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ShardingDataSource</span><span class="params">(<span class="keyword">final</span> ShardingRule shardingRule, <span class="keyword">final</span> Properties props)</span> <span class="keyword">throws</span> SQLException </span>&#123;</span><br><span class="line">    <span class="keyword">super</span>(shardingRule.getDataSourceRule().getDataSources());</span><br><span class="line">    shardingProperties = <span class="keyword">new</span> ShardingProperties(<span class="keyword">null</span> == props ? <span class="keyword">new</span> Properties() : props);</span><br><span class="line">    <span class="keyword">int</span> executorSize = shardingProperties.getValue(ShardingPropertiesConstant.EXECUTOR_SIZE);</span><br><span class="line">    executorEngine = <span class="keyword">new</span> ExecutorEngine(executorSize);</span><br><span class="line">    <span class="keyword">boolean</span> showSQL = shardingProperties.getValue(ShardingPropertiesConstant.SQL_SHOW);</span><br><span class="line">    shardingContext = <span class="keyword">new</span> ShardingContext(shardingRule, getDatabaseType(), executorEngine, showSQL);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//父类中的方法</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> DatabaseType <span class="title">getDatabaseType</span><span class="params">(<span class="keyword">final</span> Collection&lt;DataSource&gt; dataSources)</span> <span class="keyword">throws</span> SQLException </span>&#123;</span><br><span class="line">    DatabaseType result = <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">for</span> (DataSource each : dataSources) &#123;</span><br><span class="line">        DatabaseType databaseType = getDatabaseType(each);</span><br><span class="line">        Preconditions.checkState(<span class="keyword">null</span> == result || result.equals(databaseType), String.format(<span class="string">"Database type inconsistent with '%s' and '%s'"</span>, result, databaseType));</span><br><span class="line">        result = databaseType;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>4.执行sqlParsingEngine的parse方法。创建LexerEngine类。在创建LexerEngine类的时候，会传入dataType。对不同的数据库创建不同的数据库词法分析器。（因为不同的数据库拥有不同的关键字，比如mysql的 limit）。<br>5.执行LexerEingne的nextToken方法。</p>
+<ol>
+<li>isVariableBegin()</li>
+<li>isNCharBegin()</li>
+<li>isIdentifierBegin()</li>
+<li>isHexDecimalBegin()</li>
+<li>isNumberBegin()</li>
+<li>isSymbolBegin()</li>
+<li>isCharsBegin()</li>
+<li>isEnd()</li>
+</ol>
+<p>5.词法分析器会将第一个字符进行分析。以决定该sql语句是查询，更新，删除，新增，删除表语句中的哪一种。如果都不是，那么会报异常。</p>
+<h3 id="查询解析器-MysqlSelectParser"><a href="#查询解析器-MysqlSelectParser" class="headerlink" title="查询解析器 MysqlSelectParser"></a>查询解析器 MysqlSelectParser</h3><p>在执行SQLParsingEngine的parse方法的时候会创建两个对象：</p>
+<ul>
+<li>LexerEngine</li>
+<li>SQLParser<br>他们分别为词法分析器，以及sql解析器。其中，词法分析器的作用是用来将sql语句拆解为各种类型的Token，并记录词语长度以及起始为止，供sql解析器使用。<br>如果词法分析器解析完sql的第一个字符后，发现是select，那么会创建查询解析器。</li>
+</ul>
+<p>MysqlSelectParser继承自AbstractSelectParser<br>MysqlSelectParser中有三个比较重要的类变量</p>
+<ul>
+<li><code>AbstractSelectClauseParserFacade</code></li>
+<li><code>MySQLSelectOptionClauseParser</code></li>
+<li><code>MySQLLimitClauseParser</code><br>其中 <strong>AbstractSelectClauseParserFacade</strong>做了大量的解析动作，它内部有：</li>
+<li><code>DistinctClauseParser</code></li>
+<li><code>SelectListClauseParser</code></li>
+<li><code>TableReferencesClauseParser</code></li>
+<li><code>WhereClauseParser</code></li>
+<li><code>GroupByClauseParser</code></li>
+<li><code>HavingClauseParser</code></li>
+<li><code>OrderByClauseParser</code></li>
+<li><code>SelectRestClauseParser</code><br>当创建好MysqlSelectParser后将会执行parse()方法：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">parseInternal</span><span class="params">(<span class="keyword">final</span> SelectStatement selectStatement)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//如果sql语句中有distinct关键字，则抛出异常</span></span><br><span class="line">    parseDistinct();</span><br><span class="line">    <span class="comment">//跳过一些指定的关键字</span></span><br><span class="line">    parseSelectOption();</span><br><span class="line">    <span class="comment">//解析将要查询的字段</span></span><br><span class="line">    parseSelectList(selectStatement, getItems());</span><br><span class="line">    parseFrom(selectStatement);</span><br><span class="line">    parseWhere(getShardingRule(), selectStatement, getItems());</span><br><span class="line">    parseGroupBy(selectStatement);</span><br><span class="line">    parseHaving();</span><br><span class="line">    parseOrderBy(selectStatement);</span><br><span class="line">    parseLimit(selectStatement);</span><br><span class="line">    parseSelectRest();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>一些重点的方法：</p>
+<p>1.解析查询的字段   SelectListClauseParser.java</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">   <span class="function"><span class="keyword">private</span> SelectItem <span class="title">parseSelectItem</span><span class="params">(<span class="keyword">final</span> SelectStatement selectStatement)</span> </span>&#123;</span><br><span class="line"><span class="comment">//跳过指定关键字       lexerEngine.skipIfEqual(getSkippedKeywordsBeforeSelectItem());</span></span><br><span class="line">       SelectItem result;</span><br><span class="line">       <span class="comment">//在mysql中 false</span></span><br><span class="line">       <span class="keyword">if</span> (isRowNumberSelectItem()) &#123;</span><br><span class="line">           result = parseRowNumberSelectItem(selectStatement);</span><br><span class="line">           <span class="comment">//是否是select * </span></span><br><span class="line">       &#125; <span class="keyword">else</span> <span class="keyword">if</span> (isStarSelectItem()) &#123;</span><br><span class="line">           selectStatement.setContainStar(<span class="keyword">true</span>);</span><br><span class="line">           result = parseStarSelectItem();</span><br><span class="line">           <span class="comment">//是否是聚合函数</span></span><br><span class="line">       &#125; <span class="keyword">else</span> <span class="keyword">if</span> (isAggregationSelectItem()) &#123;</span><br><span class="line">           result = parseAggregationSelectItem(selectStatement);</span><br><span class="line">           parseRestSelectItem(selectStatement);</span><br><span class="line">       &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">           <span class="comment">//普通字段</span></span><br><span class="line">           result = <span class="keyword">new</span> CommonSelectItem(SQLUtil.getExactlyValue(parseCommonSelectItem(selectStatement) + parseRestSelectItem(selectStatement)), aliasClauseParser.parse());</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">return</span> result;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p>2.解析别名<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Optional&lt;String&gt; <span class="title">parse</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="comment">//当前token是否是as</span></span><br><span class="line">    <span class="keyword">if</span> (lexerEngine.skipIfEqual(DefaultKeyword.AS)) &#123;</span><br><span class="line">        <span class="comment">//紧跟着as的是否是 标点符号如果是则直接返回</span></span><br><span class="line">        <span class="keyword">if</span> (lexerEngine.equalAny(Symbol.values())) &#123;</span><br><span class="line">            <span class="keyword">return</span> Optional.absent();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//获取别名</span></span><br><span class="line">        String result = SQLUtil.getExactlyValue(lexerEngine.getCurrentToken().getLiterals());</span><br><span class="line">        lexerEngine.nextToken();</span><br><span class="line">        <span class="keyword">return</span> Optional.of(result);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//如果当前token是IDENTIFIER,CHARS,和这些指定的字符，那么也认为是别名。</span></span><br><span class="line">    <span class="keyword">if</span> (lexerEngine.equalAny(</span><br><span class="line">            Literals.IDENTIFIER, Literals.CHARS, DefaultKeyword.USER, DefaultKeyword.END, DefaultKeyword.CASE, DefaultKeyword.KEY, DefaultKeyword.INTERVAL, DefaultKeyword.CONSTRAINT)) &#123;</span><br><span class="line">        String result = SQLUtil.getExactlyValue(lexerEngine.getCurrentToken().getLiterals());</span><br><span class="line">        lexerEngine.nextToken();</span><br><span class="line">        <span class="keyword">return</span> Optional.of(result);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> Optional.absent();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>3.解析括号<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">skipParentheses</span><span class="params">(<span class="keyword">final</span> SQLStatement sqlStatement)</span> </span>&#123;</span><br><span class="line">    StringBuilder result = <span class="keyword">new</span> StringBuilder(<span class="string">""</span>);</span><br><span class="line">    <span class="keyword">int</span> count = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">if</span> (Symbol.LEFT_PAREN == lexer.getCurrentToken().getType()) &#123;</span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">int</span> beginPosition = lexer.getCurrentToken().getEndPosition();</span><br><span class="line">        result.append(Symbol.LEFT_PAREN.getLiterals());</span><br><span class="line">        lexer.nextToken();</span><br><span class="line">        <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (equalAny(Symbol.QUESTION)) &#123;</span><br><span class="line">                sqlStatement.increaseParametersIndex();</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (Assist.END == lexer.getCurrentToken().getType() || (Symbol.RIGHT_PAREN == lexer.getCurrentToken().getType() &amp;&amp; <span class="number">0</span> == count)) &#123;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (Symbol.LEFT_PAREN == lexer.getCurrentToken().getType()) &#123;</span><br><span class="line">                count++;</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (Symbol.RIGHT_PAREN == lexer.getCurrentToken().getType()) &#123;</span><br><span class="line">                count--;</span><br><span class="line">            &#125;</span><br><span class="line">            lexer.nextToken();</span><br><span class="line">        &#125;</span><br><span class="line">        result.append(lexer.getInput().substring(beginPosition, lexer.getCurrentToken().getEndPosition()));</span><br><span class="line">        lexer.nextToken();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result.toString();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="InsertParse"><a href="#InsertParse" class="headerlink" title="InsertParse"></a>InsertParse</h3><p>不支持schema.table<br>join不支持子查询</p>
 
       
     </div>
@@ -507,8 +540,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -618,6 +660,22 @@
       </section>
 
       
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#查询解析器-MysqlSelectParser"><span class="nav-number">1.</span> <span class="nav-text">查询解析器 MysqlSelectParser</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#InsertParse"><span class="nav-number">2.</span> <span class="nav-text">InsertParse</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
 
       
 
@@ -631,7 +689,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+        <div class="copyright">&copy; 2018 &mdash; <span itemprop="copyrightYear">2019</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>
