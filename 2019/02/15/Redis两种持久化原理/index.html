@@ -108,20 +108,20 @@
 
 
 
-  <meta name="description" content="Redsi持久化的意义Redsi突然down机情况下请求操作直接进入mysql，可能会导致雪崩问题。为了解决该问题，保证服务的高可用，我们可以使用Redis的持久化功能，将内存中的数据存入磁盘。当Redis挂了以后，可以快速恢复到挂之前的状态。">
+  <meta name="description" content="Redis持久化的意义Redis突然down机情况下请求操作直接进入mysql，可能会导致雪崩问题。为了解决该问题，保证服务的高可用，我们可以使用Redis的持久化功能，将内存中的数据存入磁盘。当Redis挂了以后，可以快速恢复到挂之前的状态。">
 <meta name="keywords" content="redis">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Redis两种持久化原理">
 <meta property="og:url" content="http://yoursite.com/2019/02/15/Redis两种持久化原理/index.html">
 <meta property="og:site_name" content="斑马のCODE_HOME">
-<meta property="og:description" content="Redsi持久化的意义Redsi突然down机情况下请求操作直接进入mysql，可能会导致雪崩问题。为了解决该问题，保证服务的高可用，我们可以使用Redis的持久化功能，将内存中的数据存入磁盘。当Redis挂了以后，可以快速恢复到挂之前的状态。">
+<meta property="og:description" content="Redis持久化的意义Redis突然down机情况下请求操作直接进入mysql，可能会导致雪崩问题。为了解决该问题，保证服务的高可用，我们可以使用Redis的持久化功能，将内存中的数据存入磁盘。当Redis挂了以后，可以快速恢复到挂之前的状态。">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://yoursite.com/2019/02/15/Redis两种持久化原理/rdb.png">
 <meta property="og:image" content="http://yoursite.com/2019/02/15/Redis两种持久化原理/aof.png">
-<meta property="og:updated_time" content="2019-02-15T11:34:25.163Z">
+<meta property="og:updated_time" content="2019-02-15T14:30:53.117Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Redis两种持久化原理">
-<meta name="twitter:description" content="Redsi持久化的意义Redsi突然down机情况下请求操作直接进入mysql，可能会导致雪崩问题。为了解决该问题，保证服务的高可用，我们可以使用Redis的持久化功能，将内存中的数据存入磁盘。当Redis挂了以后，可以快速恢复到挂之前的状态。">
+<meta name="twitter:description" content="Redis持久化的意义Redis突然down机情况下请求操作直接进入mysql，可能会导致雪崩问题。为了解决该问题，保证服务的高可用，我们可以使用Redis的持久化功能，将内存中的数据存入磁盘。当Redis挂了以后，可以快速恢复到挂之前的状态。">
 <meta name="twitter:image" content="http://yoursite.com/2019/02/15/Redis两种持久化原理/rdb.png">
 
 
@@ -424,7 +424,7 @@
       
 
       
-        <h3 id="Redsi持久化的意义"><a href="#Redsi持久化的意义" class="headerlink" title="Redsi持久化的意义"></a>Redsi持久化的意义</h3><p>Redsi突然down机情况下请求操作直接进入mysql，可能会导致雪崩问题。为了解决该问题，保证服务的高可用，我们可以使用Redis的持久化功能，将内存中的数据存入磁盘。当Redis挂了以后，可以快速恢复到挂之前的状态。</p>
+        <h3 id="Redis持久化的意义"><a href="#Redis持久化的意义" class="headerlink" title="Redis持久化的意义"></a>Redis持久化的意义</h3><p>Redis突然down机情况下请求操作直接进入mysql，可能会导致雪崩问题。为了解决该问题，保证服务的高可用，我们可以使用Redis的持久化功能，将内存中的数据存入磁盘。当Redis挂了以后，可以快速恢复到挂之前的状态。</p>
 <a id="more"></a>
 <p>在Redis控制台中使用 <code>info persistence</code> 命令可以查看当前Redis实例中关于持久化的配置。<br>以我们测试环境为例：<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">redis-test:0&gt;info persistence   </span><br><span class="line">    "# Persistence</span><br><span class="line">    loading:0                                #服务器当前是否正在载入持久化文件</span><br><span class="line">    rdb_changes_since_last_save:96   #尚未被RDB持久化的写命令个数</span><br><span class="line">    rdb_bgsave_in_progress:0          #服务器是否正在创建RDB文件</span><br><span class="line">    rdb_last_save_time:1550122358  #最近一次进行RDB持久化的时间戳</span><br><span class="line">    rdb_last_bgsave_status:ok         #最近一次RDB持久化是否持久化成功</span><br><span class="line">    rdb_last_bgsave_time_sec:0       #最近一次生成RDB文件所耗费的时间</span><br><span class="line">    rdb_current_bgsave_time_sec:-1 #如果当前正在生成RDB文件，到目前所消耗的时间</span><br><span class="line">    aof_enabled:0                        #是否开启了AOF持久化</span><br><span class="line">    aof_rewrite_in_progress:0         #标识AOF的rewrite操作是否正在进行中</span><br><span class="line">    aof_rewrite_scheduled:0           #rewrite任务计划，多个rewrite命令会排序执行</span><br><span class="line">    aof_last_rewrite_time_sec:-1      #最近一次AOF持久化所耗费的时间</span><br><span class="line">    aof_current_rewrite_time_sec:-1 #如果当前正在进行AOF持久化，到目前所消耗的时间</span><br><span class="line">    aof_last_bgrewrite_status:ok     #上次bgrewrite操作的状态</span><br><span class="line">    aof_last_write_status:ok           #上次rewrite操作的状态</span><br><span class="line">    "</span><br></pre></td></tr></table></figure></p>
 <p>Redis持久化共有两种：</p>
@@ -433,7 +433,7 @@
 <li>AOF</li>
 </ul>
 <p>下面对两种持久化方案进行详细讲解。</p>
-<h3 id="RDB"><a href="#RDB" class="headerlink" title="RDB"></a>RDB</h3><h5 id="简介："><a href="#简介：" class="headerlink" title="简介："></a>简介：</h5><p>RDB是redis用来持久化的一种方式，Redsi会在某个时间点将内存中的数据写入一个临时文件，在写入完成后会将该临时文件替换上一次写入的持久化文件。它是一种全量的持久化手段，因为Redis是每隔一段时间执行，所以可能会存在如果Redis突然down机，会有部分数据丢失的情况发生。</p>
+<h3 id="RDB"><a href="#RDB" class="headerlink" title="RDB"></a>RDB</h3><h5 id="简介："><a href="#简介：" class="headerlink" title="简介："></a>简介：</h5><p>RDB是redis用来持久化的一种方式，Redis会在某个时间点将内存中的数据写入一个临时文件，在写入完成后会将该临时文件替换上一次写入的持久化文件。它是一种全量的持久化手段，因为Redis是每隔一段时间执行，所以可能会存在如果Redis突然down机，会有部分数据丢失的情况发生。</p>
 <p>可以使用以下命令来获取当前快照文件的名称</p>
 <blockquote>
 <p>config get dbfilename</p>
@@ -450,7 +450,7 @@
 <p>该命令的意思是，每隔100ms检查redis的状态，如果在m秒内redis进行了n条数据的更新，就会触发持久化。 如果同时存在多条<code>save m n</code> 配置，那么只要其中一条被满足，那么就会执行持久化操作。</p>
 </blockquote>
 <h5 id="手动触发"><a href="#手动触发" class="headerlink" title="手动触发"></a>手动触发</h5><p>1.在Redis控制台上执行 <code>save</code> 命令<br>此时Redis的log日志中打印<br><figure class="highlight basic"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">114262</span>:M <span class="number">14</span> Feb <span class="number">15</span>:<span class="number">18</span>:<span class="number">08.013</span> * DB saved <span class="keyword">on</span> disk</span><br></pre></td></tr></table></figure></p>
-<p>在执行save命令之后，Redis进程会被阻塞，开始进行快照的拷贝， 当数据拷贝完成后，Redsi才会重新接受命令。</p>
+<p>在执行save命令之后，Redis进程会被阻塞，开始进行快照的拷贝， 当数据拷贝完成后，Redis才会重新接受命令。</p>
 <p>2.在Redis控制台上执行<code>bgsave</code>命令<br>此时Redis的log日志中打印<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">114262:M 14 Feb 15:18:19.589 * Background saving started by pid 42917</span><br><span class="line">42917:C 14 Feb 15:18:19.590 * DB saved on disk</span><br><span class="line">42917:C 14 Feb 15:18:19.591 * RDB: 2 MB of memory used by copy-on-write</span><br><span class="line">114262:M 14 Feb 15:18:19.617 * Background saving terminated with success</span><br></pre></td></tr></table></figure></p>
 <p>bgsave的流程图（摘的网上）：<br><img src="/2019/02/15/Redis两种持久化原理/rdb.png" alt="907c3da134d7f77f07648e12bf716f0b.png"></p>
 <p>实现 <code>bgsave</code>的原理： <strong>fork</strong> 和 <strong>copy on write</strong></p>
@@ -492,7 +492,7 @@
 <p>Redis中使用serverCron作为时间时间，去检测当前redis状态，以检查是否需要进行rewrite(与RDB相似)。<br>当前状态满足以下要求的时候会进行重写：</p>
 <ol>
 <li>目前Redis没有RDB或者AOF持久化操作在进行中。</li>
-<li>目前Redsi没有bgrewriteaof操作在进行中。</li>
+<li>目前Redis没有bgrewriteaof操作在进行中。</li>
 <li>当前AOF文件大小大于auto-aof-rewrite-min-size。</li>
 <li>满足auto-aof-rewrite-perventage。</li>
 </ol>
@@ -730,7 +730,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Redsi持久化的意义"><span class="nav-number">1.</span> <span class="nav-text">Redsi持久化的意义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RDB"><span class="nav-number">2.</span> <span class="nav-text">RDB</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#简介："><span class="nav-number">2.0.1.</span> <span class="nav-text">简介：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#自动触发"><span class="nav-number">2.0.2.</span> <span class="nav-text">自动触发</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#手动触发"><span class="nav-number">2.0.3.</span> <span class="nav-text">手动触发</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#Fork"><span class="nav-number">2.0.3.1.</span> <span class="nav-text">Fork</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#copy-on-write"><span class="nav-number">2.0.4.</span> <span class="nav-text">copy on write</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AOF"><span class="nav-number">3.</span> <span class="nav-text">AOF</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#AOF简介"><span class="nav-number">3.0.1.</span> <span class="nav-text">AOF简介</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#AOF写入"><span class="nav-number">3.0.2.</span> <span class="nav-text">AOF写入</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#同步策略"><span class="nav-number">3.0.2.1.</span> <span class="nav-text">同步策略</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#AOF重写"><span class="nav-number">3.0.3.</span> <span class="nav-text">AOF重写</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#AOF重写的意义："><span class="nav-number">3.0.3.1.</span> <span class="nav-text">AOF重写的意义：</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#自动触发-1"><span class="nav-number">3.0.3.2.</span> <span class="nav-text">自动触发</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#手动触发-1"><span class="nav-number">3.0.3.3.</span> <span class="nav-text">手动触发</span></a></li></ol></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis持久化的意义"><span class="nav-number">1.</span> <span class="nav-text">Redis持久化的意义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RDB"><span class="nav-number">2.</span> <span class="nav-text">RDB</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#简介："><span class="nav-number">2.0.1.</span> <span class="nav-text">简介：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#自动触发"><span class="nav-number">2.0.2.</span> <span class="nav-text">自动触发</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#手动触发"><span class="nav-number">2.0.3.</span> <span class="nav-text">手动触发</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#Fork"><span class="nav-number">2.0.3.1.</span> <span class="nav-text">Fork</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#copy-on-write"><span class="nav-number">2.0.4.</span> <span class="nav-text">copy on write</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AOF"><span class="nav-number">3.</span> <span class="nav-text">AOF</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#AOF简介"><span class="nav-number">3.0.1.</span> <span class="nav-text">AOF简介</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#AOF写入"><span class="nav-number">3.0.2.</span> <span class="nav-text">AOF写入</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#同步策略"><span class="nav-number">3.0.2.1.</span> <span class="nav-text">同步策略</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#AOF重写"><span class="nav-number">3.0.3.</span> <span class="nav-text">AOF重写</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#AOF重写的意义："><span class="nav-number">3.0.3.1.</span> <span class="nav-text">AOF重写的意义：</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#自动触发-1"><span class="nav-number">3.0.3.2.</span> <span class="nav-text">自动触发</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#手动触发-1"><span class="nav-number">3.0.3.3.</span> <span class="nav-text">手动触发</span></a></li></ol></li></ol></li></ol></li></ol></div>
             
 
           </div>

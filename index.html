@@ -425,7 +425,7 @@
 
       
         
-          <h3 id="Redsi持久化的意义"><a href="#Redsi持久化的意义" class="headerlink" title="Redsi持久化的意义"></a>Redsi持久化的意义</h3><p>Redsi突然down机情况下请求操作直接进入mysql，可能会导致雪崩问题。为了解决该问题，保证服务的高可用，我们可以使用Redis的持久化功能，将内存中的数据存入磁盘。当Redis挂了以后，可以快速恢复到挂之前的状态。</p>
+          <h3 id="Redis持久化的意义"><a href="#Redis持久化的意义" class="headerlink" title="Redis持久化的意义"></a>Redis持久化的意义</h3><p>Redis突然down机情况下请求操作直接进入mysql，可能会导致雪崩问题。为了解决该问题，保证服务的高可用，我们可以使用Redis的持久化功能，将内存中的数据存入磁盘。当Redis挂了以后，可以快速恢复到挂之前的状态。</p>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2019/02/15/Redis两种持久化原理/#more" rel="contents">
