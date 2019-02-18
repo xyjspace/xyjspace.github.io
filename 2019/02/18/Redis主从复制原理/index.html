@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.3.0" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.3.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.3.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '6.3.0',
+    sidebar: {"position":"right","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="使用 info replication 可以检查当前Redis实例的主从功能。 1234567891011121314基于redis 4.0.12redis-aliyun:0&amp;gt;info replication&quot;# Replicationrole:master">
+<meta name="keywords" content="-redis">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis主从复制原理">
+<meta property="og:url" content="http://yoursite.com/2019/02/18/Redis主从复制原理/index.html">
+<meta property="og:site_name" content="斑马のCODE_HOME">
+<meta property="og:description" content="使用 info replication 可以检查当前Redis实例的主从功能。 1234567891011121314基于redis 4.0.12redis-aliyun:0&amp;gt;info replication&quot;# Replicationrole:master">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-02-18T13:16:20.393Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Redis主从复制原理">
+<meta name="twitter:description" content="使用 info replication 可以检查当前Redis实例的主从功能。 1234567891011121314基于redis 4.0.12redis-aliyun:0&amp;gt;info replication&quot;# Replicationrole:master">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/02/18/Redis主从复制原理/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Redis主从复制原理 | 斑马のCODE_HOME</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">斑马のCODE_HOME</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">你不要睡着了</p>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-search">
+    <a href="/search/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-search"></i> <br />搜索</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/02/18/Redis主从复制原理/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="斑马">
+      <meta itemprop="description" content="你不要睡着了">
+      <meta itemprop="image" content="/uploads/head_image.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="斑马のCODE_HOME">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Redis主从复制原理
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-02-18 21:15:49" itemprop="dateCreated datePublished" datetime="2019-02-18T21:15:49+08:00">2019-02-18</time>
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/02/18/Redis主从复制原理/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/02/18/Redis主从复制原理/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>使用 <code>info replication</code> 可以检查当前Redis实例的主从功能。</p>
+<figure class="highlight basic"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">基于redis 4.0.12</span><br><span class="line">redis-aliyun:0&gt;info replication</span><br><span class="line"><span class="string">"# Replication</span></span><br><span class="line"><span class="string">role:master                                                                      #当前节点的角色</span></span><br><span class="line"><span class="string">connected_slaves:0                                                            #当前连接的从节点数量</span></span><br><span class="line"><span class="string">master_replid:3a7684e173291bc7766e37d600ce0b1108354879    #runid</span></span><br><span class="line"><span class="string">master_replid2:0000000000000000000000000000000000000000  #上次的主节点runid</span></span><br><span class="line"><span class="string">master_repl_offset:0                                                           #数据偏移量</span></span><br><span class="line"><span class="string">second_repl_offset:-1                                                        #上次主节点的数据偏移量</span></span><br><span class="line"><span class="string">repl_backlog_active:0                    </span></span><br><span class="line"><span class="string">repl_backlog_size:1048576</span></span><br><span class="line"><span class="string">repl_backlog_first_byte_offset:0</span></span><br><span class="line"><span class="string">repl_backlog_histlen:0</span></span><br><span class="line"><span class="string">"</span></span><br></pre></td></tr></table></figure>
+<p>理解Redis的主从架构首先理解两个概念：</p>
+<ul>
+<li>同步<br>同步可以使从服务器与主服务器达到一个相同的状态。</li>
+<li>命令传播<br>命令传播是指当主从服务器达到一个相同状态之后，如果主服务器又接收到了写命令，使主从服务器从不相同再重新达到相同的一个操作。</li>
+</ul>
+<p>当决定一台Redis节点B 要做另一台Redis节点A的从节点的时候，可以在RedisB的控制台上执行</p>
+<blockquote>
+<p>slaveof Ip port  （A的IP与端口号）</p>
+</blockquote>
+<h4 id="同步"><a href="#同步" class="headerlink" title="同步"></a>同步</h4><h5 id="全量同步"><a href="#全量同步" class="headerlink" title="全量同步"></a>全量同步</h5><p><code>slaveof</code>命令主要是通过<code>SYNC</code>命令来完成的，以下是<code>SYNC</code>命令的过程：</p>
+<ol>
+<li>从服务器向主服务器发送<code>SYNC</code>命令。</li>
+<li>主服务器收到<code>SYNC</code>命令，并执行bgsave操作。在生成RDB文件的同时，将新的写操作加入一个缓冲区。</li>
+<li>主服务器将生成好的RDB文件传送给从服务器，从服务器接收RDB文件，并将RDB文件载入到自己的内存中。此时从服务器中的内容与主服务器执行bgsave那一刻的内容相同。</li>
+<li>主服务器将记录在缓冲区中的内容传输给从服务器，从服务器收到数据后进进行数据的更新，达到和主服务器相同的状态。</li>
+<li>从服务器开始接受请求。</li>
+</ol>
+<p>如图所示：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">participant 主服务器</span><br><span class="line">participant 从服务器</span><br><span class="line">从服务器-&gt;&gt;主服务器: 发送SYNC命令</span><br><span class="line">主服务器-&gt;&gt;主服务器: 执行bgsave命令</span><br><span class="line">Note Right of 主服务器: 在执行RDB文件的时候将新的写命令添加到缓冲区</span><br><span class="line">主服务器-&gt;&gt;从服务器: 传输RDB文件</span><br><span class="line">从服务器-&gt;&gt;从服务器: 接收RDB文件</span><br><span class="line">Note Right of 从服务器: 删除旧的数据，载入新的数据</span><br><span class="line">主服务器-&gt;&gt;从服务器: 发送缓冲区中的数据</span><br><span class="line">从服务器--&gt;从服务器: 接收缓冲区的内容，并进行数据同步</span><br></pre></td></tr></table></figure></p>
+<h5 id="命令传播"><a href="#命令传播" class="headerlink" title="命令传播"></a>命令传播</h5><p>当从服务器与主服务器同步完成后，如果主服务器又接收到了新的写命令，这个时候主从又到了一个不一致的状态。为了保证主从数据的一致性，在同步操作完成后，主服务器会将每个写操作都传给从服务器，以达到数据状态一致的目的。</p>
+<h5 id="Redis2-8之前复制的缺点"><a href="#Redis2-8之前复制的缺点" class="headerlink" title="Redis2.8之前复制的缺点"></a>Redis2.8之前复制的缺点</h5><p>Redis2.8之前的复制过程存在很大的问题:</p>
+<ul>
+<li>如果同步过程完成，在命令传播阶段主从连接断开，那么从服务器重新连接到主服务器上之后会再次执行<code>SYNC</code>命令。</li>
+<li>如果从服务器在与主服务进行同步的过程中发生了网络中断，或者网络波动，这个时候会进行两次，甚至多次同步的操作。</li>
+</ul>
+<p>上面有讲master在完成同步操作的过程中会执行bgsave命令，虽然bgsave是基于fork的，不会影响主服务器对外提供服务。但是频繁的bgsave操作也会造成性能的严重浪费：</p>
+<ul>
+<li>在fork的过程中会造成短时间的主进程阻塞。</li>
+<li>虽然使用了copy-on-write操作，但是当主进程的数据修改了，仍旧会造成主服务的内存严重浪费。</li>
+<li>Redis频繁保存RDB文件，浪费磁盘IO,和CPU资源。</li>
+<li>主服务频繁给从服务器发送RDB文件，如果RDB文件过大，会浪费网络资源。</li>
+</ul>
+<h4 id="增量同步"><a href="#增量同步" class="headerlink" title="增量同步"></a>增量同步</h4><p>为了解决上述问题，从Redis2.8之后加入了<code>PSYNC</code>命令。<br><code>PSYNC</code> 的同步过程分为两种模式：</p>
+<ul>
+<li>完整同步</li>
+<li>部分同步<br>完整同步与上面的全量同步一样，这里介绍的是新增的内容：<strong>部分重同步</strong>。<br>部分同步(增量同步)解决了主从断开连接之后，从服务器必须再进行一次全量同步的问题。</li>
+</ul>
+<p><code>PSYNC</code>命令的实现原理：</p>
+<h5 id="PSYNC中的三个重要组成部分"><a href="#PSYNC中的三个重要组成部分" class="headerlink" title="PSYNC中的三个重要组成部分"></a>PSYNC中的三个重要组成部分</h5><h6 id="主服务器的偏移地址与从服务器的偏移地址"><a href="#主服务器的偏移地址与从服务器的偏移地址" class="headerlink" title="主服务器的偏移地址与从服务器的偏移地址"></a>主服务器的偏移地址与从服务器的偏移地址</h6><p>主从服务器分别会维护一个偏移地址，主服务每次向从服务器发送N自己的数据，主服务器的偏移地址会加上N。同理从服务器每接收N字节的数据，从服务器的偏移地址会加上N。</p>
+<h6 id="主服务的复制积压缓冲区"><a href="#主服务的复制积压缓冲区" class="headerlink" title="主服务的复制积压缓冲区"></a>主服务的复制积压缓冲区</h6><p>复制积压缓冲区是一个固定长度的先进先出的队列，默认大小为1MB。<br>在主服务进行命令传播的同时，也会将数据加到复制积压缓冲区中。<br>复制积压缓冲区不仅包含写的数据，同时还包含了该数据的数据偏移地址。</p>
+<h6 id="主服务器的运行ID"><a href="#主服务器的运行ID" class="headerlink" title="主服务器的运行ID"></a>主服务器的运行ID</h6><p>Redis中主从服务器均有自己的运行ID。<br>从服务在第一次进行同步操作的时候，主服务器会将自身的ID传给从服务器，从服务器进行保存。在从服务断线重连进行<code>PSYNC</code>命令的时候不仅会发送自身的偏移量，还会发送主服务器的ID。</p>
+<ul>
+<li>如果该ID与主服务器ID不同，说明主服务器发生了重启，这时候要进行全量同步。</li>
+<li>如果该ID与主服务器相同，那么进行增量同步。</li>
+</ul>
+<p>数据解压缓冲区的大小可以设置。公式为： 2 <em> second(断线之后平均重连耗费的时间) </em> 每秒会写入的数据（最终根据Redis协议保存的文件的大小。）</p>
+<h5 id="PSYNC命令调用方式"><a href="#PSYNC命令调用方式" class="headerlink" title="PSYNC命令调用方式"></a>PSYNC命令调用方式</h5><ul>
+<li>从服务在第一次调用<code>slaveof</code> 命令的时候  发送 PSYNC ？ -1 代表全量同步。</li>
+<li>从服务器断线重连后，发送 PSYNC runid offset，进行增量同步。</li>
+</ul>
+<h5 id="PSYNC调用过程"><a href="#PSYNC调用过程" class="headerlink" title="PSYNC调用过程"></a>PSYNC调用过程</h5><ol>
+<li>从服务器向主服务发送slaveof命令</li>
+<li>从服务器自己判断是否是第一次进行同步（以前从未发送过同步命令，或者执行过 slaveof no one命令）。</li>
+<li>如过是第一次调用那么调用PSYNC  [？] [ -1] 进行全量同步，如果是断线重连那么发送 PSYNC [runid] [offset]进行增量同步。</li>
+<li>主服务器判断ID是否相同，如果不同，进行全量同步，如果相同那么继续。</li>
+<li>查看offset+1 是否存在于复制积压缓冲区中，如果存在那么进行增量同步，如果不存在，则进行全量同步。</li>
+</ol>
+<h4 id="同步的过程"><a href="#同步的过程" class="headerlink" title="同步的过程"></a>同步的过程</h4><ol>
+<li>在从服务器执行slaveof命令后，会尝试与主服务建立连接。</li>
+<li>在连接建立成功后，从服务器会Ping一次主服务器，以检查连接是否可用。如果连接异常，那么从服务器会释放该连接，并尝试重新建立连接。</li>
+<li>如果从服务器设置了masterauth选项，那么在从服务器将会发送一条<code>AUTH</code>命令，尝试进行身份验证。 只有主服务器与从服务器都不设置密码校验，或者主服务与从服务器都设置了密码校验并且匹配成功，才会通过校验。否则均为失败，不会继续进行同步操作。</li>
+<li>从服务向主服务器发送自己的监听端口，主服务器收到后进行保存。</li>
+<li>执行同步操作。</li>
+</ol>
+<h4 id="心跳检测"><a href="#心跳检测" class="headerlink" title="心跳检测"></a>心跳检测</h4><p>在命令传播阶段，从服务器会以每秒一次的频率检测自身与master是否保持良好的连接情况。<br>通过心跳检测可以完成以下功能：</p>
+<ul>
+<li>检查主从之间的连接是否健康。</li>
+<li>作为实现min-slaves的参数<br>min-slaves的意思是如果主服务器的可用从节点小于某个值且延迟大于多久之后，将拒绝写操作。</li>
+<li>检测命令丢失，实现数据补发的操作。<br>心跳检测时候，从服务器会向主服务器发送自身的偏移地址，如果主服务器发现自身的偏移地址与从服务器的偏移地址不同，将会主动向从服务器发送数据。</li>
+</ul>
+<h4 id="Redis4-0中改进后的增量同步"><a href="#Redis4-0中改进后的增量同步" class="headerlink" title="Redis4.0中改进后的增量同步"></a>Redis4.0中改进后的增量同步</h4><p>虽然Redis2.8之后加入的部分同步解决了之前复制过程中的部分问题，但是它自身仍有一定的缺陷：</p>
+<blockquote>
+<p>如果Redis master因为某些原因需要重启，这个时候它自身的id与复制偏移量均会丢失。或者Redis的master发生了故障转移（加入哨兵机制后会自动的选举leader，以实现主节点高可用），这个时候因为runid发生了变化，Redis均会发生全量同步。</p>
+</blockquote>
+<p>在Redis4.0之后加入了<code>PSYNC2</code>就是为了解决这些问题。</p>
+<h5 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h5><p>在Redis4.0之后，主从服务器中不仅有master_repid（runid），又新增了一个master_repid2</p>
+<ul>
+<li>master_repid2 主要用于存储上次主实例的replid，初始值为0.</li>
+</ul>
+<p>为了解决<code>PSYNC</code>存在的问题，<code>PSYNC2</code>主要做了以下操作：</p>
+<ul>
+<li>redis4.0中保存两组 runid 和 offset<br>第一组runid以及offset与PSYNC中主节点以之前的意思相同。但是从节点的runid不再保存自己的运行时id，而是保存当前正在同步的<code>master</code>节点的runid.<br>第二组rundid以及offset保存上次主服务器的runid以及偏移地址。</li>
+<li>从服务器默认开启复制积压缓冲区的功能。当master发生故障，slave被选为新的master后，其它落后于该节点的slave节点可以进行数据同步。</li>
+</ul>
+<p>关于<code>PSYNC2</code>可以参考这篇博客:</p>
+<blockquote>
+<p><a href="https://www.jianshu.com/p/087ccc8c6a30" target="_blank" rel="noopener">https://www.jianshu.com/p/087ccc8c6a30</a></p>
+</blockquote>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/redis/" rel="tag"># -redis</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/02/17/JVM字节码内存分布/" rel="next" title="JVM字节码内存分布">
+                <i class="fa fa-chevron-left"></i> JVM字节码内存分布
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/head_image.png"
+                alt="斑马" />
+            
+              <p class="site-author-name" itemprop="name">斑马</p>
+              <p class="site-description motion-element" itemprop="description">你不要睡着了</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">6</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">6</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/xyjspace" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:21409714@qq.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.xiefayang.com" title="i蝸居年華_谢谢谢" target="_blank">i蝸居年華_谢谢谢</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#同步"><span class="nav-number">1.</span> <span class="nav-text">同步</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#全量同步"><span class="nav-number">1.1.</span> <span class="nav-text">全量同步</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#命令传播"><span class="nav-number">1.2.</span> <span class="nav-text">命令传播</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Redis2-8之前复制的缺点"><span class="nav-number">1.3.</span> <span class="nav-text">Redis2.8之前复制的缺点</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#增量同步"><span class="nav-number">2.</span> <span class="nav-text">增量同步</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#PSYNC中的三个重要组成部分"><span class="nav-number">2.1.</span> <span class="nav-text">PSYNC中的三个重要组成部分</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#主服务器的偏移地址与从服务器的偏移地址"><span class="nav-number">2.1.1.</span> <span class="nav-text">主服务器的偏移地址与从服务器的偏移地址</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#主服务的复制积压缓冲区"><span class="nav-number">2.1.2.</span> <span class="nav-text">主服务的复制积压缓冲区</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#主服务器的运行ID"><span class="nav-number">2.1.3.</span> <span class="nav-text">主服务器的运行ID</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#PSYNC命令调用方式"><span class="nav-number">2.2.</span> <span class="nav-text">PSYNC命令调用方式</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#PSYNC调用过程"><span class="nav-number">2.3.</span> <span class="nav-text">PSYNC调用过程</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#同步的过程"><span class="nav-number">3.</span> <span class="nav-text">同步的过程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#心跳检测"><span class="nav-number">4.</span> <span class="nav-text">心跳检测</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Redis4-0中改进后的增量同步"><span class="nav-number">5.</span> <span class="nav-text">Redis4.0中改进后的增量同步</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#原理"><span class="nav-number">5.1.</span> <span class="nav-text">原理</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 &mdash; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">斑马</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.7.1</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Muse</a> v6.3.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.3.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.3.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.3.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'rYwUgHvNR0gs6G3tecTA4TGB-gzGzoHsz',
+        appKey: 'fWcscBws5bQ6QjCfC9S7knPc',
+        placeholder: 'Just go go',
+        avatar:'identicon',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
