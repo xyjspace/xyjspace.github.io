@@ -425,74 +425,14 @@
 
       
         
-          
-            <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>今天在阅读Redsi集群的时候，看到Node之间建立通信需要经历<code>handshake</code>阶段，阅读下来发现Redis的<code>handshake</code>与http建立连接的三次握手有些相似。因为从未整理过http通信的知识，这里再好好回顾一下。</p>
-<p>首先要明白为什么http建立连接需要的通信次数是三次，而不是一次，两次，四次？</p>
-<h4 id="为什么要使用三次握手"><a href="#为什么要使用三次握手" class="headerlink" title="为什么要使用三次握手"></a>为什么要使用三次握手</h4><p>比如我们有两台机器:A和B。我们要在这两台机器上建立通信。</p>
-<h5 id="一次通信"><a href="#一次通信" class="headerlink" title="一次通信"></a>一次通信</h5><p>A-&gt;B<br>A告诉B我要向你发送数据了。如果B接受成功倒还好，如果B接受不成功，而且A并不知道B接受不成功，那么A不知道到底要不要与B之间进行通信。</p>
-<h5 id="两次通信"><a href="#两次通信" class="headerlink" title="两次通信"></a>两次通信</h5><p>A-&gt;B<br>B–&gt;A<br>与一次通信不同的是，B在接收了A的消息之后，会告诉A我已经收到了消息。这个时候A知道A与B之间的连接是OK的，会继续发送消息。<br>从理论上来讲这种情况是合理的，那为什么要浪费第三次通信呢？<br>原因是因为：这样可以防止失效请求报文又传递给服务器，因而产生错误。</p>
-<blockquote>
-<p>例如，A给B发送了一条SYN报文，但是该报文因为某种原因阻塞在了网络节点中，但是并没有消失，导致该报文在A延迟释放连接后的某个时间内才到达B。如果没有第三次通信，那么在B接收到报文后，B向A发送ACK回复，并且开始等待数据。但是A已经不会再向B发送任何数据了。所以B就会造成资源的浪费。</p>
-</blockquote>
-<h5 id="三次通信"><a href="#三次通信" class="headerlink" title="三次通信"></a>三次通信</h5><p>A -&gt; B<br>B –&gt; A<br>A —&gt; B<br>因为两次通信可能会造成A不通的问题，在那么在B回复A之后，A再回复一下B， B就知道A也是可用的了。<br>三次握手的图片：(摘自网上)<br><img src="/2019/02/23/TCP三次握手与四次握手/三次握手.png" alt="三次握手.png"></p>
-<h4 id="为什么关闭连接需要四次握手"><a href="#为什么关闭连接需要四次握手" class="headerlink" title="为什么关闭连接需要四次握手"></a>为什么关闭连接需要四次握手</h4><p>首先要了解一个概念： TCP是全双工通信的。<br>那么为了实现可靠的关闭，必须要分别断开连接。如果A向B发送了一条数据，当A发送完毕之后就关闭与B的连接，那么可能会造成数据发送一半连接就关闭了。</p>
-<p>原理：<br>当A向B发送了FIN的报文后，那么将不会再向B发送数据。但是可以接受来自B的信息。当B返回A ack的时候，A就知道B已经接受完信息，开始等待B的FIN了。当B接受完信息或者也没有信息发送给A的时候，B执行被动关闭向A发送FIN请求。</p>
-<p>如图所示：(摘自网上)<br><img src="/2019/02/23/TCP三次握手与四次握手/四次握手.png" alt="四次握手.png"></p>
-<h4 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h4><p>使用tcpdum的抓包数据如下图所示：</p>
-<blockquote>
-<p>tcpdump -i eth0 port 11111  意思是抓取所有源端口与目标端口为11111的包  </p>
-</blockquote>
-<p><img src="en-resource://database/460:1" alt="89a626b1e8ae5b07dfb821c98699aac6.png"></p>
-<p>上图是一次telnet ip port 过程中服务端所抓到的数据包，除去中间画框的两个数据，上边的三个数据包，以及下边的四个数据包分别对应连接的三次握手和断开连接的四次握手。</p>
-<h6 id="此次连接的详细说明"><a href="#此次连接的详细说明" class="headerlink" title="此次连接的详细说明"></a>此次连接的详细说明</h6><ol>
-<li>182向服务端发送一个标识符为<code>SYN</code>的请求，并指明序号为<code>488441269</code>。</li>
-<li>服务端接收到了请求并向182发送了 标识符为<code>SYN</code>的数据报文作为应答。序号为<code>3336955853</code>，并且附加一个确认号为 seq+1 ： <code>488441270</code></li>
-<li>客户端将收到的确认号与自身的序号+1比较，如果相同，则返回一个确认号：<code>3336955854</code></li>
-</ol>
-<h6 id="TCP报文格式"><a href="#TCP报文格式" class="headerlink" title="TCP报文格式"></a>TCP报文格式</h6><p><img src="/2019/02/23/TCP三次握手与四次握手/demo.png" alt="demo.png"><br>其中标志位总共有六个</p>
-<table>
-<thead>
-<tr>
-<th>标志位</th>
-<th>解释</th>
-<th>标志位</th>
-<th>解释</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>URG</td>
-<td>紧急指针有效</td>
-<td>ACK</td>
-<td>确认序号</td>
-</tr>
-<tr>
-<td>PSH</td>
-<td>接受方应该尽快将报文交还应用方</td>
-<td>SYN</td>
-<td>发起一个连接</td>
-</tr>
-<tr>
-<td>FIN</td>
-<td>释放一个连接</td>
-<td>RST</td>
-<td>重置连接</td>
-</tr>
-</tbody>
-</table>
-<p>其中S,F,P,<code>.</code> 可以在报文首部看到。 R和Ack用作在tcpdum中作特殊显示。</p>
-<h6 id="win4096"><a href="#win4096" class="headerlink" title="win4096"></a>win4096</h6><p>win4096代表连接的窗口大小，因为传输的数据为0，所以窗口也被设置为了默认的4096.</p>
-<h5 id="mss1426"><a href="#mss1426" class="headerlink" title="mss1426"></a>mss1426</h5><p>代表了发送端指明的最大报文段长度。</p>
-<p>TCP/IP详解卷一：协议在线阅读地址</p>
-<blockquote>
-<p><a href="http://www.52im.net/topic-tcpipvol1.html" target="_blank" rel="noopener">http://www.52im.net/topic-tcpipvol1.html</a></p>
-</blockquote>
-<p>网上文章的地址:</p>
-<blockquote>
-<p><a href="https://www.jianshu.com/p/e7f45779008a" target="_blank" rel="noopener">https://www.jianshu.com/p/e7f45779008a</a><br><a href="https://www.jianshu.com/p/a1ebc61ce141" target="_blank" rel="noopener">https://www.jianshu.com/p/a1ebc61ce141</a></p>
-</blockquote>
-
-          
+          <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>今天在阅读Redsi集群的时候，看到Node之间建立通信需要经历<code>handshake</code>阶段，阅读下来发现Redis的<code>handshake</code>与http建立连接的三次握手有些相似。因为从未整理过http通信的知识，这里再好好回顾一下。<br></p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2019/02/23/TCP三次握手与四次握手/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>

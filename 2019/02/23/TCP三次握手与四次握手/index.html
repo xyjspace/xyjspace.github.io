@@ -108,22 +108,22 @@
 
 
 
-  <meta name="description" content="前言今天在阅读Redsi集群的时候，看到Node之间建立通信需要经历handshake阶段，阅读下来发现Redis的handshake与http建立连接的三次握手有些相似。因为从未整理过http通信的知识，这里再好好回顾一下。 首先要明白为什么http建立连接需要的通信次数是三次，而不是一次，两次，四次？ 为什么要使用三次握手比如我们有两台机器:A和B。我们要在这两台机器上建立通信。 一次通信A-">
+  <meta name="description" content="前言今天在阅读Redsi集群的时候，看到Node之间建立通信需要经历handshake阶段，阅读下来发现Redis的handshake与http建立连接的三次握手有些相似。因为从未整理过http通信的知识，这里再好好回顾一下。">
 <meta name="keywords" content="TCP">
 <meta property="og:type" content="article">
 <meta property="og:title" content="TCP三次握手与四次握手">
 <meta property="og:url" content="http://yoursite.com/2019/02/23/TCP三次握手与四次握手/index.html">
 <meta property="og:site_name" content="斑马のCODE_HOME">
-<meta property="og:description" content="前言今天在阅读Redsi集群的时候，看到Node之间建立通信需要经历handshake阶段，阅读下来发现Redis的handshake与http建立连接的三次握手有些相似。因为从未整理过http通信的知识，这里再好好回顾一下。 首先要明白为什么http建立连接需要的通信次数是三次，而不是一次，两次，四次？ 为什么要使用三次握手比如我们有两台机器:A和B。我们要在这两台机器上建立通信。 一次通信A-">
+<meta property="og:description" content="前言今天在阅读Redsi集群的时候，看到Node之间建立通信需要经历handshake阶段，阅读下来发现Redis的handshake与http建立连接的三次握手有些相似。因为从未整理过http通信的知识，这里再好好回顾一下。">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://yoursite.com/2019/02/23/TCP三次握手与四次握手/三次握手.png">
 <meta property="og:image" content="http://yoursite.com/2019/02/23/TCP三次握手与四次握手/四次握手.png">
 <meta property="og:image" content="en-resource://database/460:1">
 <meta property="og:image" content="http://yoursite.com/2019/02/23/TCP三次握手与四次握手/demo.png">
-<meta property="og:updated_time" content="2019-02-23T13:00:36.228Z">
+<meta property="og:updated_time" content="2019-02-23T13:03:59.512Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="TCP三次握手与四次握手">
-<meta name="twitter:description" content="前言今天在阅读Redsi集群的时候，看到Node之间建立通信需要经历handshake阶段，阅读下来发现Redis的handshake与http建立连接的三次握手有些相似。因为从未整理过http通信的知识，这里再好好回顾一下。 首先要明白为什么http建立连接需要的通信次数是三次，而不是一次，两次，四次？ 为什么要使用三次握手比如我们有两台机器:A和B。我们要在这两台机器上建立通信。 一次通信A-">
+<meta name="twitter:description" content="前言今天在阅读Redsi集群的时候，看到Node之间建立通信需要经历handshake阶段，阅读下来发现Redis的handshake与http建立连接的三次握手有些相似。因为从未整理过http通信的知识，这里再好好回顾一下。">
 <meta name="twitter:image" content="http://yoursite.com/2019/02/23/TCP三次握手与四次握手/三次握手.png">
 
 
@@ -426,7 +426,7 @@
       
 
       
-        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>今天在阅读Redsi集群的时候，看到Node之间建立通信需要经历<code>handshake</code>阶段，阅读下来发现Redis的<code>handshake</code>与http建立连接的三次握手有些相似。因为从未整理过http通信的知识，这里再好好回顾一下。</p>
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>今天在阅读Redsi集群的时候，看到Node之间建立通信需要经历<code>handshake</code>阶段，阅读下来发现Redis的<code>handshake</code>与http建立连接的三次握手有些相似。因为从未整理过http通信的知识，这里再好好回顾一下。<br><a id="more"></a></p>
 <p>首先要明白为什么http建立连接需要的通信次数是三次，而不是一次，两次，四次？</p>
 <h4 id="为什么要使用三次握手"><a href="#为什么要使用三次握手" class="headerlink" title="为什么要使用三次握手"></a>为什么要使用三次握手</h4><p>比如我们有两台机器:A和B。我们要在这两台机器上建立通信。</p>
 <h5 id="一次通信"><a href="#一次通信" class="headerlink" title="一次通信"></a>一次通信</h5><p>A-&gt;B<br>A告诉B我要向你发送数据了。如果B接受成功倒还好，如果B接受不成功，而且A并不知道B接受不成功，那么A不知道到底要不要与B之间进行通信。</p>
