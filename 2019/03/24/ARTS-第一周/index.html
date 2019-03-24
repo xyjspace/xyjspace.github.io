@@ -116,7 +116,7 @@
 <meta property="og:site_name" content="斑马のCODE_HOME">
 <meta property="og:description" content="耗子叔发起的ARTS计划，第一周。ARTS计划简介：  https://time.geekbang.org/column/article/85839?from=singlemessage">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-03-24T10:48:50.237Z">
+<meta property="og:updated_time" content="2019-03-24T10:54:24.541Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ARTS-第一周">
 <meta name="twitter:description" content="耗子叔发起的ARTS计划，第一周。ARTS计划简介：  https://time.geekbang.org/column/article/85839?from=singlemessage">
@@ -430,8 +430,60 @@
 <p>给定一个链表，删除链表的倒数第 n 个节点，并且返回链表的头结点。</p>
 <h5 id="示例"><a href="#示例" class="headerlink" title="示例:"></a>示例:</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">给定一个链表: 1-&gt;2-&gt;3-&gt;4-&gt;5, 和 n = 2.</span><br><span class="line"></span><br><span class="line">当删除了倒数第二个节点后，链表变为 1-&gt;2-&gt;3-&gt;5.</span><br></pre></td></tr></table></figure>
 <h5 id="说明："><a href="#说明：" class="headerlink" title="说明："></a>说明：</h5><p>给定的 n 保证是有效的。</p>
-<h5 id="解答："><a href="#解答：" class="headerlink" title="解答："></a>解答：</h5><p><strong>思路一</strong><br>两次遍历,第一次遍历获取总数,第二次遍历在sum-n处进行处理，让sum-n指向sum-n-2。<br>| 两次遍历   |                      |<br>| ———- | ——————– |<br>| 优点       | 实现简单，不浪费空间 |<br>| 缺点       | 不是最优实现         |<br>| 时间复杂度 | O(N)                 |<br>| 空间复杂度 | O(1)                 |</p>
-<p><strong>思路二</strong><br>一次遍历，但是在第一次遍历中创建一个map，key为position,value为ListNode.这样可以一次遍历拿到值。<br>| 一次遍历   |                                            |<br>| ———- | —————————————— |<br>| 优点       | 实现简单，相比于两次循环，节省了部分时间。 |<br>| 缺点       | 浪费空间                                   |<br>| 时间复杂度 | O(N)                                       |<br>| 空间复杂度 | O(1)                                       |</p>
+<h5 id="解答："><a href="#解答：" class="headerlink" title="解答："></a>解答：</h5><p><strong>思路一</strong><br>两次遍历,第一次遍历获取总数,第二次遍历在sum-n处进行处理，让sum-n指向sum-n-2。</p>
+<table>
+<thead>
+<tr>
+<th>两次遍历</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>优点</td>
+<td>实现简单，不浪费空间</td>
+</tr>
+<tr>
+<td>缺点</td>
+<td>不是最优实现</td>
+</tr>
+<tr>
+<td>时间复杂度</td>
+<td>O(N)</td>
+</tr>
+<tr>
+<td>空间复杂度</td>
+<td>O(1)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>思路二</strong><br>一次遍历，但是在第一次遍历中创建一个map，key为position,value为ListNode.这样可以一次遍历拿到值。</p>
+<table>
+<thead>
+<tr>
+<th>一次遍历</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>优点</td>
+<td>实现简单，相比于两次循环，节省了部分时间。</td>
+</tr>
+<tr>
+<td>缺点</td>
+<td>浪费空间</td>
+</tr>
+<tr>
+<td>时间复杂度</td>
+<td>O(N)</td>
+</tr>
+<tr>
+<td>空间复杂度</td>
+<td>O(1)</td>
+</tr>
+</tbody>
+</table>
 <p><strong>思路三</strong><br>根据提示，第三次实现使用了双链表，即快慢指针。代码如下:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> ListNode <span class="title">removeNthFromEnd</span><span class="params">(ListNode head, <span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">   ListNode first = head;</span><br><span class="line">   ListNode second = <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; n + <span class="number">1</span>; i++) &#123;</span><br><span class="line">        <span class="comment">//快指针</span></span><br><span class="line">        first = first.next;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//慢指针开始跑</span></span><br><span class="line">    ListNode position = head;</span><br><span class="line">    <span class="keyword">while</span> (first != <span class="keyword">null</span>) &#123;</span><br><span class="line">        second = position;</span><br><span class="line">        first = first.next;</span><br><span class="line">        position = position.next;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//如果second为null,代表N刚好等于链表的长度。</span></span><br><span class="line">    <span class="keyword">if</span> (second == <span class="keyword">null</span>) &#123;</span><br><span class="line">        head = head.next;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        second.next = second.next.next;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> head;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>快指针默认指向head,然后移动N步。<br>如果first不为null,那么开始移动second,这样当first指向null的时候second与尾节点刚好N+1个间隔。让second指向下下个位置，就可以把第N个元素删除。<br>如果second为null,则说明，n刚好等于链表的长度，那么直接点将第一个节点后移即可。</p>
 <blockquote>
