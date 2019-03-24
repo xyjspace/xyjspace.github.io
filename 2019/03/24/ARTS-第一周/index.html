@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.3.0" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.3.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.3.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '6.3.0',
+    sidebar: {"position":"right","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="耗子叔发起的ARTS计划，第一周。ARTS计划简介：  https://time.geekbang.org/column/article/85839?from=singlemessage">
+<meta name="keywords" content="-ARTS">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ARTS-第一周">
+<meta property="og:url" content="http://yoursite.com/2019/03/24/ARTS-第一周/index.html">
+<meta property="og:site_name" content="斑马のCODE_HOME">
+<meta property="og:description" content="耗子叔发起的ARTS计划，第一周。ARTS计划简介：  https://time.geekbang.org/column/article/85839?from=singlemessage">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-03-24T10:48:50.237Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ARTS-第一周">
+<meta name="twitter:description" content="耗子叔发起的ARTS计划，第一周。ARTS计划简介：  https://time.geekbang.org/column/article/85839?from=singlemessage">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/03/24/ARTS-第一周/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>ARTS-第一周 | 斑马のCODE_HOME</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">斑马のCODE_HOME</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">你不要睡着了</p>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-search">
+    <a href="/search/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-search"></i> <br />搜索</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/24/ARTS-第一周/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="斑马">
+      <meta itemprop="description" content="你不要睡着了">
+      <meta itemprop="image" content="/uploads/head_image.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="斑马のCODE_HOME">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">ARTS-第一周
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-03-24 18:42:42" itemprop="dateCreated datePublished" datetime="2019-03-24T18:42:42+08:00">2019-03-24</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/ARTS/" itemprop="url" rel="index"><span itemprop="name">ARTS</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/03/24/ARTS-第一周/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/03/24/ARTS-第一周/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>耗子叔发起的ARTS计划，第一周。<br>ARTS计划简介：</p>
+<blockquote>
+<p><a href="https://time.geekbang.org/column/article/85839?from=singlemessage" target="_blank" rel="noopener">https://time.geekbang.org/column/article/85839?from=singlemessage</a><br><a id="more"></a></p>
+</blockquote>
+<h4 id="A"><a href="#A" class="headerlink" title="A"></a>A</h4><p><strong>leetcode题库中第19题：删除链表的倒数第N个节点</strong></p>
+<hr>
+<p>给定一个链表，删除链表的倒数第 n 个节点，并且返回链表的头结点。</p>
+<h5 id="示例"><a href="#示例" class="headerlink" title="示例:"></a>示例:</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">给定一个链表: 1-&gt;2-&gt;3-&gt;4-&gt;5, 和 n = 2.</span><br><span class="line"></span><br><span class="line">当删除了倒数第二个节点后，链表变为 1-&gt;2-&gt;3-&gt;5.</span><br></pre></td></tr></table></figure>
+<h5 id="说明："><a href="#说明：" class="headerlink" title="说明："></a>说明：</h5><p>给定的 n 保证是有效的。</p>
+<h5 id="解答："><a href="#解答：" class="headerlink" title="解答："></a>解答：</h5><p><strong>思路一</strong><br>两次遍历,第一次遍历获取总数,第二次遍历在sum-n处进行处理，让sum-n指向sum-n-2。<br>| 两次遍历   |                      |<br>| ———- | ——————– |<br>| 优点       | 实现简单，不浪费空间 |<br>| 缺点       | 不是最优实现         |<br>| 时间复杂度 | O(N)                 |<br>| 空间复杂度 | O(1)                 |</p>
+<p><strong>思路二</strong><br>一次遍历，但是在第一次遍历中创建一个map，key为position,value为ListNode.这样可以一次遍历拿到值。<br>| 一次遍历   |                                            |<br>| ———- | —————————————— |<br>| 优点       | 实现简单，相比于两次循环，节省了部分时间。 |<br>| 缺点       | 浪费空间                                   |<br>| 时间复杂度 | O(N)                                       |<br>| 空间复杂度 | O(1)                                       |</p>
+<p><strong>思路三</strong><br>根据提示，第三次实现使用了双链表，即快慢指针。代码如下:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> ListNode <span class="title">removeNthFromEnd</span><span class="params">(ListNode head, <span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">   ListNode first = head;</span><br><span class="line">   ListNode second = <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; n + <span class="number">1</span>; i++) &#123;</span><br><span class="line">        <span class="comment">//快指针</span></span><br><span class="line">        first = first.next;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//慢指针开始跑</span></span><br><span class="line">    ListNode position = head;</span><br><span class="line">    <span class="keyword">while</span> (first != <span class="keyword">null</span>) &#123;</span><br><span class="line">        second = position;</span><br><span class="line">        first = first.next;</span><br><span class="line">        position = position.next;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//如果second为null,代表N刚好等于链表的长度。</span></span><br><span class="line">    <span class="keyword">if</span> (second == <span class="keyword">null</span>) &#123;</span><br><span class="line">        head = head.next;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        second.next = second.next.next;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> head;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>快指针默认指向head,然后移动N步。<br>如果first不为null,那么开始移动second,这样当first指向null的时候second与尾节点刚好N+1个间隔。让second指向下下个位置，就可以把第N个元素删除。<br>如果second为null,则说明，n刚好等于链表的长度，那么直接点将第一个节点后移即可。</p>
+<blockquote>
+<p>因为链表的知识已经忘的差不多，所以忘记头结点怎么用了。这里这么写可实现，但是代码不易阅读，等将头结点复习一下对代码进行重构。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>双指针</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>优点</td>
+<td>相比于一次循环，节省了空间</td>
+</tr>
+<tr>
+<td>缺点</td>
+<td>实现相对复杂</td>
+</tr>
+<tr>
+<td>时间复杂度</td>
+<td>O(N)</td>
+</tr>
+<tr>
+<td>空间复杂度</td>
+<td>O(1)</td>
+</tr>
+</tbody>
+</table>
+<h4 id="R"><a href="#R" class="headerlink" title="R"></a>R</h4><p>R选择的是Alibaba/Sentinel的官方文档。选取这个原因是因为，我需要学习Sentinel，同时因为Sentinel是双语版的，可以在读完英文文档之后再读一遍中文文档，进行验证。</p>
+<blockquote>
+<p><a href="https://github.com/alibaba/Sentinel" target="_blank" rel="noopener">https://github.com/alibaba/Sentinel</a></p>
+</blockquote>
+<h5 id="概述："><a href="#概述：" class="headerlink" title="概述："></a>概述：</h5><p>Sentinel主要提供了流量控制，熔断，系统自适应保护的功能，来保证多个微服务之间的稳定。</p>
+<h5 id="特性"><a href="#特性" class="headerlink" title="特性:"></a>特性:</h5><ul>
+<li>Sentinel在Alibaba中被广泛应用，在双十一中覆盖了几乎所有的核心场景。例如: 秒杀，流量削峰填谷，断开下游服务（熔断）, 集群流量控制等。</li>
+<li>Sentinel同时提供了实时监控的能力，可以实时查看单机机器的运行时信息，和少于500节点的集群的聚合信息。</li>
+<li>Sentinel可以提供了开箱即用的接口去接入一些常见的框架，例如：springCloud,dubbo,gRPC。我们可以方便的在我们的项目中加入Sentinel的依赖。</li>
+<li>提供了丰富的SPI拓展，我们可以方便快速的自定义我们的逻辑，例如自定义路由管理和自适应数据源。</li>
+</ul>
+<p>从架构图上还能看出来有: 路由管理，服务发现，链路追踪？集群限流，热点数据限流，来源访问控制的功能。</p>
+<h5 id="使用"><a href="#使用" class="headerlink" title="使用:"></a>使用:</h5><ol>
+<li>加入依赖</li>
+<li>定义资源， Sentinel的资源 可以直接用API包装我们的业务代码，也可以使用注解。</li>
+<li>定义规则， 规则要绑定到一个资源上。（从代码上来看是这样的, 而且这里的规则是一个流控的规则）</li>
+</ol>
+<p>以上是Sentinel的概览。</p>
+<h4 id="T"><a href="#T" class="headerlink" title="T"></a>T</h4><p>今天在阅读RocketMQ源码的时候发现了一个之前从未使用过的方法就是StringBuilder.setLength();</p>
+<h5 id="介绍"><a href="#介绍" class="headerlink" title="介绍:"></a>介绍:</h5><p><code>StringBuilder</code>的setLength()方法可以重用StringBuilder对象。<br>看一下方法<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setLength</span><span class="params">(<span class="keyword">int</span> newLength)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//如果newLength&lt;0抛出异常</span></span><br><span class="line">    <span class="keyword">if</span> (newLength &lt; <span class="number">0</span>)</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> StringIndexOutOfBoundsException(newLength);</span><br><span class="line">    ensureCapacityInternal(newLength);</span><br><span class="line">    <span class="keyword">if</span> (count &lt; newLength) &#123;</span><br><span class="line">        <span class="comment">//如果count小于传递的值，那么将count--&gt;newLength之间的值置为空。</span></span><br><span class="line">        Arrays.fill(value, count, newLength, <span class="string">'\0'</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//count为newLength.</span></span><br><span class="line">    count = newLength;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>再看一下toString方法<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// Create a copy, don't share the array</span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> String(value, <span class="number">0</span>, count);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这里会对0-count的范围内进行拷贝。调用的Arrays.copyOfRange().</p>
+<h5 id="总结"><a href="#总结" class="headerlink" title="总结:"></a>总结:</h5><p>StringBuilder.setLength()函数只重置它的count指针，而char[]则会继续重用，而toString()时会把当前的count指针也作为参数传给String的构造函数，所以不用担心把超过新内容大小的旧内容也传进去了。</p>
+<p>通过使用StringBuilder.setLength(0) 可以避免重复创建StringBuilder对象。</p>
+<p>网上博客</p>
+<blockquote>
+<p><a href="https://www.cnblogs.com/Zombie-Xian/p/6237409.html" target="_blank" rel="noopener">https://www.cnblogs.com/Zombie-Xian/p/6237409.html</a></p>
+</blockquote>
+<h4 id="S"><a href="#S" class="headerlink" title="S"></a>S</h4><p>在看RocketMQ消息生产以及消息消费的过程中，总是对broker端做的动作有些模糊不解，在看broker端处理的代码时候，因为不理解RocketMQ的消息布局，所以也看不大懂。因此下定决心将RocketMQ中消息存储部分的源码进行梳理，从而对RocketMQ的核心部分有一个整体的了解，同时方便之后的复习。本周的Share主要是记录RocketMQ中消息存储的commitLog源码的跟踪。<br>地址为:</p>
+<blockquote>
+<p><a href="http://www.xunyajie.com/2019/03/24/RocketMQ消息存储/" target="_blank" rel="noopener">http://www.xunyajie.com/2019/03/24/RocketMQ消息存储/</a></p>
+</blockquote>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ARTS/" rel="tag"># -ARTS</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/03/24/RocketMQ消息存储/" rel="next" title="RocketMQ消息存储">
+                <i class="fa fa-chevron-left"></i> RocketMQ消息存储
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/head_image.png"
+                alt="斑马" />
+            
+              <p class="site-author-name" itemprop="name">斑马</p>
+              <p class="site-description motion-element" itemprop="description">你不要睡着了</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">7</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">9</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/xyjspace" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:21409714@qq.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.xiefayang.com" title="i蝸居年華_谢谢谢" target="_blank">i蝸居年華_谢谢谢</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#A"><span class="nav-number">1.</span> <span class="nav-text">A</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#示例"><span class="nav-number">1.1.</span> <span class="nav-text">示例:</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#说明："><span class="nav-number">1.2.</span> <span class="nav-text">说明：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#解答："><span class="nav-number">1.3.</span> <span class="nav-text">解答：</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#R"><span class="nav-number">2.</span> <span class="nav-text">R</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#概述："><span class="nav-number">2.1.</span> <span class="nav-text">概述：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#特性"><span class="nav-number">2.2.</span> <span class="nav-text">特性:</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#使用"><span class="nav-number">2.3.</span> <span class="nav-text">使用:</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#T"><span class="nav-number">3.</span> <span class="nav-text">T</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#介绍"><span class="nav-number">3.1.</span> <span class="nav-text">介绍:</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#总结"><span class="nav-number">3.2.</span> <span class="nav-text">总结:</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#S"><span class="nav-number">4.</span> <span class="nav-text">S</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 &mdash; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">斑马</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.7.1</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Muse</a> v6.3.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.3.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.3.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.3.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'rYwUgHvNR0gs6G3tecTA4TGB-gzGzoHsz',
+        appKey: 'fWcscBws5bQ6QjCfC9S7knPc',
+        placeholder: 'Just go go',
+        avatar:'identicon',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

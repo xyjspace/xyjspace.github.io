@@ -116,7 +116,7 @@
 <meta property="og:site_name" content="斑马のCODE_HOME">
 <meta property="og:description" content="前言在看RocketMQ消息生产以及消息消费的过程中，总是对broker端做的动作有些模糊不解，在看broker端处理的代码时候，因为不理解RocketMQ的消息布局，所以也看不大懂。因此下定决心将RocketMQ中消息存储部分的源码进行梳理，从而对RocketMQ的核心部分有一个整体的了解，同时方便之后的复习。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-03-24T06:31:28.416Z">
+<meta property="og:updated_time" content="2019-03-24T10:52:31.633Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="RocketMQ消息存储">
 <meta name="twitter:description" content="前言在看RocketMQ消息生产以及消息消费的过程中，总是对broker端做的动作有些模糊不解，在看broker端处理的代码时候，因为不理解RocketMQ的消息布局，所以也看不大懂。因此下定决心将RocketMQ中消息存储部分的源码进行梳理，从而对RocketMQ的核心部分有一个整体的了解，同时方便之后的复习。">
@@ -548,17 +548,16 @@
 </blockquote>
 </li>
 </ul>
-<ol start="5">
-<li>检查当前消息是否是事务消息，如果是事务消息，阶段为预处理或者是撤销，那么将queueOffset设置为0，不加入consumeQueue中去。</li>
-<li>将消息的properties进行序列化。如果消息属性的字节长度大于32768，那么<strong>返回</strong>错误。<em>PROPERTIES_SIZE_EXCEEDED</em><br><strong>TODO: 这里有个问题就是在刚开的时候也会对消息的长度进行校验，但是那个时候是对String类型进行校验，而这里是在String类型序列化后进行校验。所以一个是字符长度，一个是字节长度？</strong></li>
+</li>
+<li><p>检查当前消息是否是事务消息，如果是事务消息，阶段为预处理或者是撤销，那么将queueOffset设置为0，不加入consumeQueue中去。</p>
+</li>
+<li>将消息的properties进行序列化。如果消息属性的字节长度大于32768，那么<strong>返回</strong>错误。<em>PROPERTIES_SIZE_EXCEEDED</em><br>  <strong>TODO: 这里有个问题就是在刚开的时候也会对消息的长度进行校验，但是那个时候是对String类型进行校验，而这里是在String类型序列化后进行校验。所以一个是字符长度，一个是字节长度？</strong></li>
 <li>拿到消息的topic字节数组，以及消息体的字节数组，再拿到上一步序列化后的properties的长度，计算消息的长度。如果消息的长度大于4M(默认)，<strong>返回</strong>错误。<em>MESSAGE_SIZE_EXCEEDED</em></li>
 <li>如果消息长度+空字节数（固定位八个字节）大于当前mappedFile的剩余空间，将mappedFile对应的内存映射ByteBuffer剩余空间填空，<strong>返回</strong>错误  <em>END_OF_FILE</em>.<ul>
 <li>当前mappedFile的剩余空间在调用方法的时候传过来，属性名为maxBlank</li>
 </ul>
 </li>
-<li>重置msgStoreItemMemory，将消息按照固定顺序写入msgStoreItemMemory中。再将msgStoreItemMemory写入byteBuffer中。<br><strong>TODO: 这里为什么不直接往byteBuffer中写呢？做个中间转移有什么作用？</strong></li>
-</ol>
-</li>
+<li>重置msgStoreItemMemory，将消息按照固定顺序写入msgStoreItemMemory中。再将msgStoreItemMemory写入byteBuffer中。<br> <strong>TODO: 这里为什么不直接往byteBuffer中写呢？做个中间转移有什么作用？</strong></li>
 <li>包装返回结果，返回信息为<em>PUT_OK</em></li>
 <li>根据消息的sysFlag对消息的逻辑地址进行修改。如果消息不是事务消息，或者消息到了事务消息的commit阶段，那么将topicQueueTable中的ququeOffset加1.</li>
 <li>返回AppendMessageResult。</li>
@@ -606,6 +605,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/03/24/ARTS-第一周/" rel="prev" title="ARTS-第一周">
+                ARTS-第一周 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -686,7 +689,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">9</span>
+                    <span class="site-state-item-count">10</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -711,7 +714,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">6</span>
+                      
+                    
+                    <span class="site-state-item-count">7</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -740,7 +745,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">8</span>
+                      
+                    
+                    <span class="site-state-item-count">9</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
