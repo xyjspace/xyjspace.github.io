@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.3.0" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.3.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.3.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '6.3.0',
+    sidebar: {"position":"right","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="前言在看RocketMQ消息生产以及消息消费的过程中，总是对broker端做的动作有些模糊不解，在看broker端处理的代码时候，因为不理解RocketMQ的消息布局，所以也看不大懂。因此下定决心将RocketMQ中消息存储部分的源码进行梳理，从而对RocketMQ的核心部分有一个整体的了解，同时方便之后的复习。">
+<meta name="keywords" content="-RocketMQ -消息中间件">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RocketMQ消息存储">
+<meta property="og:url" content="http://yoursite.com/2019/03/24/RocketMQ消息存储/index.html">
+<meta property="og:site_name" content="斑马のCODE_HOME">
+<meta property="og:description" content="前言在看RocketMQ消息生产以及消息消费的过程中，总是对broker端做的动作有些模糊不解，在看broker端处理的代码时候，因为不理解RocketMQ的消息布局，所以也看不大懂。因此下定决心将RocketMQ中消息存储部分的源码进行梳理，从而对RocketMQ的核心部分有一个整体的了解，同时方便之后的复习。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-03-24T06:31:28.416Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="RocketMQ消息存储">
+<meta name="twitter:description" content="前言在看RocketMQ消息生产以及消息消费的过程中，总是对broker端做的动作有些模糊不解，在看broker端处理的代码时候，因为不理解RocketMQ的消息布局，所以也看不大懂。因此下定决心将RocketMQ中消息存储部分的源码进行梳理，从而对RocketMQ的核心部分有一个整体的了解，同时方便之后的复习。">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/03/24/RocketMQ消息存储/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>RocketMQ消息存储 | 斑马のCODE_HOME</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">斑马のCODE_HOME</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">你不要睡着了</p>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-search">
+    <a href="/search/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-search"></i> <br />搜索</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/24/RocketMQ消息存储/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="斑马">
+      <meta itemprop="description" content="你不要睡着了">
+      <meta itemprop="image" content="/uploads/head_image.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="斑马のCODE_HOME">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">RocketMQ消息存储
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-03-24 14:30:02" itemprop="dateCreated datePublished" datetime="2019-03-24T14:30:02+08:00">2019-03-24</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/RocketMQ/" itemprop="url" rel="index"><span itemprop="name">RocketMQ</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/03/24/RocketMQ消息存储/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/03/24/RocketMQ消息存储/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>在看RocketMQ消息生产以及消息消费的过程中，总是对broker端做的动作有些模糊不解，在看broker端处理的代码时候，因为不理解RocketMQ的消息布局，所以也看不大懂。因此下定决心将RocketMQ中消息存储部分的源码进行梳理，从而对RocketMQ的核心部分有一个整体的了解，同时方便之后的复习。<br><a id="more"></a></p>
+<p>所有TODO，都是原理待看的地方。这里先对主流程进行梳理, 细节稍后再看。<br>另外涉及到内存映射，同/异步刷盘，主从同步的地方也是稍微再看。现在暂时只对主流程进行处理。</p>
+<h4 id="commitLog的处理逻辑"><a href="#commitLog的处理逻辑" class="headerlink" title="commitLog的处理逻辑"></a>commitLog的处理逻辑</h4><p>入口为<code>DefaultMessageStore</code>类.</p>
+<h5 id="DefaultMessageStore-putMessage-MessageExtBrokerInner-msg"><a href="#DefaultMessageStore-putMessage-MessageExtBrokerInner-msg" class="headerlink" title="DefaultMessageStore.putMessage(MessageExtBrokerInner msg)"></a>DefaultMessageStore.putMessage(MessageExtBrokerInner msg)</h5><ol>
+<li>校验store是否关闭，如果关闭，<strong>返回</strong>错误。<em>SERVICE_NOT_AVAILABLE</em></li>
+<li>校验当前broker的角色是否是slave，如果是slave，<strong>返回</strong>错误。 <em>SERVICE_NOT_AVAILABLE</em></li>
+<li>校验当前 runningFlag是否具备写权限，如果不具备，<strong>返回</strong>错误。<em>SERVICE_NOT_AVAILABLE</em></li>
+<li>校验消息topic是否超长，如果超长(128字符长度)，<strong>返回</strong>错误。<em>MESSAGE_ILLEGAL</em></li>
+<li>校验消息的属性是否超长，如果超长(65536字符长度)，<strong>返回</strong>错误。<em>PROPERTIES_SIZE_EXCEEDED</em></li>
+<li>校验当前OSPageCache是否繁忙，如果繁忙，<strong>返回</strong>错误。<em>OS_PAGECACHE_BUSY</em><br> <strong>TODO: 如何检验OSPageCache是否繁忙？</strong></li>
+<li>调用commitLog.putMessage(msg)方法，等待返回。 返回值如下:</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>PutMessageResult</th>
+<th>简介</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PutMessageStatus</td>
+<td>处理状态, 如果成功为PUT_OK</td>
+</tr>
+<tr>
+<td>AppendMessageResult</td>
+<td>在处理MappedFile的时候包装的返回值</td>
+</tr>
+</tbody>
+</table>
+<ol start="8">
+<li>计算处理时间，如果大于500ms，打印warn级别日志。</li>
+<li>统计处理时间。</li>
+<li>如果result为空，或者不为成功，统计失败次数。</li>
+<li>返回result。</li>
+</ol>
+<h5 id="CommitLog-putMessage-MessageExtBrokerInner-msg"><a href="#CommitLog-putMessage-MessageExtBrokerInner-msg" class="headerlink" title="CommitLog.putMessage(MessageExtBrokerInner msg)"></a>CommitLog.putMessage(MessageExtBrokerInner msg)</h5><ol>
+<li>设置消息的存储时间storeTimestamp。</li>
+<li>设置消息的CRC。<strong>TODO: 什么是CRC?</strong></li>
+<li>根据当前消息的sysFlag拿到事务消息的flag.<br> <strong>TODO: 这里消息的sysFlag是什么东西，和消息消费中的flag有什么区别？</strong></li>
+<li>(不是事务消息 || 到了事务消息的commit阶段) &amp;&amp; 同时消息为延时消息。 那么将消息的topic以及queueId放入消息属性中，key分别为:<code>REAL_TOPIC</code>和<code>REAL_QID</code>。 将消息的topic设置为:<code>SCHEDULE_TOPIC_XXX</code>, 然后根据消息的延时级别放入对应的queueId中。</li>
+<li>从mappedFileQueue中拿到最新的mappedFile.<br> <strong>TODO: 什么是mappedFileQueue, 什么是mappedFile</strong><br> <strong>TODO: 如何从mappedFileQueue中拿到最新的mappedFile</strong> </li>
+<li><strong>上锁</strong>，这里分为自旋锁，以及可重入锁。<br><strong>TODO：这里自旋锁以及可重入锁的实现。什么情况下用什么样的锁？</strong></li>
+<li>重新设置storeTimestamp，因为同一时间，只有一个线程可以进入commitLog，所以在临界区中再重新设置时间，可以保证消息的全局有序性。<br><strong>TODO：为什么上面要设置一遍存储时间？</strong></li>
+<li>如果mappedFile为空，或者已满。会创建一个新的mappedFile.<ul>
+<li>如果mappedFile为空，那么新建的mappedFile的起始偏移量为0。</li>
+<li>如果已满，那么起始偏移量为当前mappedFile的起始迁移量+mappedFileSize。</li>
+</ul>
+</li>
+<li>如果mappedFile仍旧为空（多数情况下是因为磁盘的空间不足或者权限不够），<strong>返回</strong>错误。<em>CREATE_MAPEDFILE_FAILED</em></li>
+<li>执行，MappedFile.appendMessage(msg, this.appendMessageCallback)， 等待返回，返回值在MappedFile中会提到。</li>
+<li>拿到返回结果，<strong>释放锁。</strong><ul>
+<li>如果为PUT_OK</li>
+<li>如果为END_OF_FILE，说明当前的mappedFile的空间不足，需要创建一个新的mappedFile。如果在创建新mappedFile的时候出现异常，则<strong>返回</strong>错误。<em>CREATE_MAPEDFILE_FAILED</em>。 拿到新的mappedFile之后重新执行appendMessage()。 这一步会给unlockMappedFile复制，值为旧的mappedFile.</li>
+<li>如果是MESSAGE_SIZE_EXCEEDED或者PROPERTIES_SIZE_EXCEEDED  <strong>返回</strong>错误, <em>MESSAGE_ILLEGAL</em></li>
+<li>如果是UNKNOWN_ERROR或者是别的错误， <strong>返回</strong>错误，<em>UNKNOWN_ERROR</em></li>
+</ul>
+</li>
+<li>计算总共锁的时间，如果超过了500ms，则打印warn日志。</li>
+<li>如果unlockMappedFile不为空(在第11步会赋值) &amp;&amp; messageStoreConfig.isWarmMapedFileEnable = true(默认为false)<br> <strong>TODO: 这一步不影响主流程，目前看不出是做什么</strong></li>
+<li>包装返回信息。<code>PutMessageResult</code>  状态为: <em>PUT_OK</em></li>
+<li>调用storeStatsService进行统计。</li>
+<li>调用handleDiskFlush(result, putMessageResult, msg)进行刷盘。<br>  <strong>TODO: 同步刷盘以及异步刷盘，很重要。</strong></li>
+<li>handleHA(result, putMessageResult, msg);<br>  <strong>TODO: 主从同步，很重要</strong> </li>
+<li>返回putMessageResult。</li>
+</ol>
+<hr>
+<h5 id="MappedFile-appendMessage-MessageExtBrokerInner-msg-AppendMessageCallback-cb"><a href="#MappedFile-appendMessage-MessageExtBrokerInner-msg-AppendMessageCallback-cb" class="headerlink" title="MappedFile.appendMessage(MessageExtBrokerInner msg, AppendMessageCallback cb)"></a>MappedFile.appendMessage(MessageExtBrokerInner msg, AppendMessageCallback cb)</h5><ol>
+<li>如果当前mappedFile的写指针大于或者等于当前mappedFile的文件大小那么抛出UNKOWN_ERROR异常。</li>
+<li>如果mappedFile的写指针小于mappedFile的大小，那么创建一个与mappedFile相同大小的内存映射，同时将缓存的位置与当前mappedFile的写指针的位置对齐。<br> <strong>TODO：这里涉及到了内存映射，是一个核心知识。</strong></li>
+<li>根据消息的所属进行不同的处理，消息的所属是指：该消息是单笔消息还是批量消息。如果消息不属于这两个中的任何一个，<strong>返回</strong>异常。<em>UNKNOWN_ERROR</em></li>
+<li>如果是单笔消息，执行AppendMessageCallback.doAppend(fileFromOffset,byteBuffer, maxBlank,MessageExtBrokerInner) 等待返回。 返回值如下:<ul>
+<li>maxBlank = fileSize - currentPos</li>
+</ul>
+</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>AppendMessageResult 中的属性</th>
+<th>简介</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AppendMessageStatus</td>
+<td>处理状态，如果处理成功为PUT_OK</td>
+</tr>
+<tr>
+<td>wroteOffset</td>
+<td>消息在commitlog中的物理地址</td>
+</tr>
+<tr>
+<td>wroteBytes</td>
+<td>消息的长度</td>
+</tr>
+<tr>
+<td>msgId</td>
+<td>消息ID</td>
+</tr>
+<tr>
+<td>storeTimestamp</td>
+<td>存储时间</td>
+</tr>
+<tr>
+<td>pagecacheRT</td>
+<td>存入内存映射的耗时</td>
+</tr>
+</tbody>
+</table>
+<p><strong>需要注意的是在拿到第四步结果的时候，消息还没有持久到磁盘中，当前只是存在于内存中</strong></p>
+<ol start="5">
+<li>MapFile的wrotePositon增加对应消息的长度。</li>
+<li>返回返回AppendMessageResult。</li>
+</ol>
+<hr>
+<h5 id="DefaultAppendMessageCallback-doAppend-long-fileFromOffset-ByteBuffer-byteBuffer-int-maxBlank-MessageExtBrokerInner-msgInner"><a href="#DefaultAppendMessageCallback-doAppend-long-fileFromOffset-ByteBuffer-byteBuffer-int-maxBlank-MessageExtBrokerInner-msgInner" class="headerlink" title="DefaultAppendMessageCallback.doAppend(long fileFromOffset,ByteBuffer byteBuffer,int maxBlank,MessageExtBrokerInner msgInner)"></a>DefaultAppendMessageCallback.doAppend(long fileFromOffset,ByteBuffer byteBuffer,int maxBlank,MessageExtBrokerInner msgInner)</h5><ol>
+<li>计算消息的物理偏移位置: long wroteOffset = fileFromOffset + byteBuffer.position();</li>
+<li>将字节缓冲区的可读位置重置为0，同时限制只能读取八位。<br> <strong>TODO: 这里涉及到了NIO中的ByteBuffer的flip函数以及limit函数</strong></li>
+<li>创建消息ID. ID的组成为: 4字节host地址+4字节端口号+8字节的消息偏移量。</li>
+<li><p>查询当前<code>commitLog</code>实例的topicQueueTable变量，拿到当前topig-queueId待写入的偏移量。如果为空，那么从0开始，并添加到topicQueueTable中。</p>
+<ul>
+<li>DefaultAppendMessageCallback是CommitLog类的内部类因此可以在DefaultAppendMessageCallBck对象中操作外部类的对象。<br><strong>这里运用了StringBuilder.setLength()方法重用了StringBuilder对象</strong>。<br><strong>TODO: 这里的queueOffset与上面计算出来的物理偏移地址有什么区别?</strong> <blockquote>
+<p>queueOffset是位于consumeQueue中的逻辑偏移地址。 1代表第一个消息，2代表是第二个消息。</p>
+</blockquote>
+</li>
+</ul>
+<ol start="5">
+<li>检查当前消息是否是事务消息，如果是事务消息，阶段为预处理或者是撤销，那么将queueOffset设置为0，不加入consumeQueue中去。</li>
+<li>将消息的properties进行序列化。如果消息属性的字节长度大于32768，那么<strong>返回</strong>错误。<em>PROPERTIES_SIZE_EXCEEDED</em><br><strong>TODO: 这里有个问题就是在刚开的时候也会对消息的长度进行校验，但是那个时候是对String类型进行校验，而这里是在String类型序列化后进行校验。所以一个是字符长度，一个是字节长度？</strong></li>
+<li>拿到消息的topic字节数组，以及消息体的字节数组，再拿到上一步序列化后的properties的长度，计算消息的长度。如果消息的长度大于4M(默认)，<strong>返回</strong>错误。<em>MESSAGE_SIZE_EXCEEDED</em></li>
+<li>如果消息长度+空字节数（固定位八个字节）大于当前mappedFile的剩余空间，将mappedFile对应的内存映射ByteBuffer剩余空间填空，<strong>返回</strong>错误  <em>END_OF_FILE</em>.<ul>
+<li>当前mappedFile的剩余空间在调用方法的时候传过来，属性名为maxBlank</li>
+</ul>
+</li>
+<li>重置msgStoreItemMemory，将消息按照固定顺序写入msgStoreItemMemory中。再将msgStoreItemMemory写入byteBuffer中。<br><strong>TODO: 这里为什么不直接往byteBuffer中写呢？做个中间转移有什么作用？</strong></li>
+</ol>
+</li>
+<li>包装返回结果，返回信息为<em>PUT_OK</em></li>
+<li>根据消息的sysFlag对消息的逻辑地址进行修改。如果消息不是事务消息，或者消息到了事务消息的commit阶段，那么将topicQueueTable中的ququeOffset加1.</li>
+<li>返回AppendMessageResult。</li>
+</ol>
+<h4 id="ConsumeQueue的处理逻辑"><a href="#ConsumeQueue的处理逻辑" class="headerlink" title="ConsumeQueue的处理逻辑"></a>ConsumeQueue的处理逻辑</h4><p>//待总结</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/RocketMQ-消息中间件/" rel="tag"># -RocketMQ -消息中间件</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/02/24/JVM类加载机制/" rel="next" title="JVM类加载机制">
+                <i class="fa fa-chevron-left"></i> JVM类加载机制
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/head_image.png"
+                alt="斑马" />
+            
+              <p class="site-author-name" itemprop="name">斑马</p>
+              <p class="site-description motion-element" itemprop="description">你不要睡着了</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">9</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">8</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/xyjspace" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:21409714@qq.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.xiefayang.com" title="i蝸居年華_谢谢谢" target="_blank">i蝸居年華_谢谢谢</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#commitLog的处理逻辑"><span class="nav-number">2.</span> <span class="nav-text">commitLog的处理逻辑</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#DefaultMessageStore-putMessage-MessageExtBrokerInner-msg"><span class="nav-number">2.1.</span> <span class="nav-text">DefaultMessageStore.putMessage(MessageExtBrokerInner msg)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#CommitLog-putMessage-MessageExtBrokerInner-msg"><span class="nav-number">2.2.</span> <span class="nav-text">CommitLog.putMessage(MessageExtBrokerInner msg)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#MappedFile-appendMessage-MessageExtBrokerInner-msg-AppendMessageCallback-cb"><span class="nav-number">2.3.</span> <span class="nav-text">MappedFile.appendMessage(MessageExtBrokerInner msg, AppendMessageCallback cb)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#DefaultAppendMessageCallback-doAppend-long-fileFromOffset-ByteBuffer-byteBuffer-int-maxBlank-MessageExtBrokerInner-msgInner"><span class="nav-number">2.4.</span> <span class="nav-text">DefaultAppendMessageCallback.doAppend(long fileFromOffset,ByteBuffer byteBuffer,int maxBlank,MessageExtBrokerInner msgInner)</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ConsumeQueue的处理逻辑"><span class="nav-number">3.</span> <span class="nav-text">ConsumeQueue的处理逻辑</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 &mdash; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">斑马</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.7.1</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Muse</a> v6.3.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.3.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.3.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.3.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'rYwUgHvNR0gs6G3tecTA4TGB-gzGzoHsz',
+        appKey: 'fWcscBws5bQ6QjCfC9S7knPc',
+        placeholder: 'Just go go',
+        avatar:'identicon',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
