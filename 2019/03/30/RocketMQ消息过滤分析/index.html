@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.3.0" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.3.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.3.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '6.3.0',
+    sidebar: {"position":"right","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="前言简单介绍一下RocketMQ的消息过滤实现原理，参考丁威老师的《RocketMQ技术内幕》。">
+<meta name="keywords" content="RocketMQ,消息中间件">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RocketMQ消息过滤分析">
+<meta property="og:url" content="http://yoursite.com/2019/03/30/RocketMQ消息过滤分析/index.html">
+<meta property="og:site_name" content="斑马のCODE_HOME">
+<meta property="og:description" content="前言简单介绍一下RocketMQ的消息过滤实现原理，参考丁威老师的《RocketMQ技术内幕》。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-03-30T08:20:48.827Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="RocketMQ消息过滤分析">
+<meta name="twitter:description" content="前言简单介绍一下RocketMQ的消息过滤实现原理，参考丁威老师的《RocketMQ技术内幕》。">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/03/30/RocketMQ消息过滤分析/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>RocketMQ消息过滤分析 | 斑马のCODE_HOME</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">斑马のCODE_HOME</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">你不要睡着了</p>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-search">
+    <a href="/search/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-search"></i> <br />搜索</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/30/RocketMQ消息过滤分析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="斑马">
+      <meta itemprop="description" content="你不要睡着了">
+      <meta itemprop="image" content="/uploads/head_image.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="斑马のCODE_HOME">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">RocketMQ消息过滤分析
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-03-30 16:16:43" itemprop="dateCreated datePublished" datetime="2019-03-30T16:16:43+08:00">2019-03-30</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/RocketMQ/" itemprop="url" rel="index"><span itemprop="name">RocketMQ</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/03/30/RocketMQ消息过滤分析/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/03/30/RocketMQ消息过滤分析/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>简单介绍一下RocketMQ的消息过滤实现原理，参考丁威老师的《RocketMQ技术内幕》。<br><a id="more"></a><br>RocketMQ支持表达式过滤以及类过滤两种，表达式过滤又分为TAG和SQL92。</p>
+<p>MessageFilter类主要有两个方法：</p>
+<ul>
+<li>isMatchedByConsumeQueue(final Long tagsCode, final ConsumeQueueExt.CqExtUnit cqExtUnit)；</li>
+<li>isMatchedByCommitLog(final ByteBuffer msgBuffer, final Map&lt;String, String&gt; properties);</li>
+</ul>
+<p>RocketMQ中消息过滤是在订阅的时候做的。下面抛出两个问题:</p>
+<ol>
+<li><p>记得在看消息消费consumer端逻辑的时候，那里面有对tag的过滤，那个过滤和这个过滤有什么区别？</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Tag过滤方式：Consumer端在订阅消息时除了指定Topic还可以指定TAG，如果一个消息有多个TAG，可以用||分隔。其中，Consumer端会将这个订阅请求构建成一个 SubscriptionData，发送一个Pull消息的请求给Broker端。Broker端从RocketMQ的文件存储层—Store读取数据之前，会用这些数据先构建一个MessageFilter，然后传给Store。Store从 ConsumeQueue读取到一条记录后，会用它记录的消息tag hash值去做过滤，由于在服务端只是根据hashcode进行判断，无法精确对tag原始字符串进行过滤，故在消息消费端拉取到消息后，还需要对消息的原始tag字符串进行比对，如果不同，则丢弃该消息，不进行消息消费。</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>是否意味着消息消费broker端已经将过滤好的消息传给了consumer?</p>
+<blockquote>
+<p>是的，如果是基于tag过滤，那么broker会基于tag的hashCode进行过滤</p>
+</blockquote>
+</li>
+</ol>
+<h2 id="Tag表达式过滤"><a href="#Tag表达式过滤" class="headerlink" title="Tag表达式过滤"></a>Tag表达式过滤</h2><h3 id="Consumer端对过滤信息初步处理"><a href="#Consumer端对过滤信息初步处理" class="headerlink" title="Consumer端对过滤信息初步处理"></a>Consumer端对过滤信息初步处理</h3><h4 id="创建Consumer-订阅topic以及消息表达式"><a href="#创建Consumer-订阅topic以及消息表达式" class="headerlink" title="创建Consumer,订阅topic以及消息表达式"></a>创建Consumer,订阅topic以及消息表达式</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">DefaultMQPushConsumer consumer = <span class="keyword">new</span> DefaultMQPushConsumer(<span class="string">"syn_consumer_1"</span>);</span><br><span class="line">consumer.setNamesrvAddr(<span class="string">"127.0.0.1:9876"</span>);</span><br><span class="line">consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_FIRST_OFFSET);</span><br><span class="line">consumer.subscribe(<span class="string">"syn_message"</span>, <span class="string">"*"</span>);</span><br><span class="line">consumer.registerMessageListener(<span class="keyword">new</span> MessageListenerConcurrently() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> ConsumeConcurrentlyStatus <span class="title">consumeMessage</span><span class="params">(List&lt;MessageExt&gt; msgs,</span></span></span><br><span class="line"><span class="function"><span class="params">        ConsumeConcurrentlyContext context)</span> </span>&#123;</span><br><span class="line">        System.out.printf(<span class="string">"%s Receive New Messages: %s %n"</span>, Thread.currentThread().getName(), msgs);</span><br><span class="line">        <span class="keyword">return</span> ConsumeConcurrentlyStatus.CONSUME_SUCCESS;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line">consumer.start();</span><br><span class="line">System.out.printf(<span class="string">"Consumer Started.%n"</span>);</span><br></pre></td></tr></table></figure>
+<p>上面是创建DefaultMQPushConsumer的代码，与消息过滤有关的是subscrib()方法。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">subscribe</span><span class="params">(String topic, String subExpression)</span> <span class="keyword">throws</span> MQClientException </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.defaultMQPushConsumerImpl.subscribe(topic, subExpression);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">subscribe</span><span class="params">(String topic, String subExpression)</span> <span class="keyword">throws</span> MQClientException </span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        SubscriptionData subscriptionData = FilterAPI.buildSubscriptionData(<span class="keyword">this</span>.defaultMQPushConsumer.getConsumerGroup(),</span><br><span class="line">            topic, subExpression);</span><br><span class="line">        <span class="keyword">this</span>.rebalanceImpl.getSubscriptionInner().put(topic, subscriptionData);</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span>.mQClientFactory != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">this</span>.mQClientFactory.sendHeartbeatToAllBrokerWithLock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> MQClientException(<span class="string">"subscription exception"</span>, e);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>以上代码所做的操作： 消费者订阅Topic以及消息过滤表达式，将订阅信息放入rebalance中。</p>
+<table>
+<thead>
+<tr>
+<th>SubscriptionData类结构</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>classFilterMode</td>
+<td>是否为类过滤模式，默认为false</td>
+</tr>
+<tr>
+<td>topic</td>
+<td>消息主题的名字</td>
+</tr>
+<tr>
+<td>subString</td>
+<td>消息过滤表达式，如果有多个表达式，那么用双竖线分隔</td>
+</tr>
+<tr>
+<td>tagsSet</td>
+<td>消息过滤的tag集合，消费端过滤时使用的字段</td>
+</tr>
+<tr>
+<td>codeSet</td>
+<td>消息过滤的 tag的hashcode的集合</td>
+</tr>
+<tr>
+<td>subVersion</td>
+<td>版本号</td>
+</tr>
+<tr>
+<td>expressionType</td>
+<td>过滤类型: SQL92或者tag，默认为ExpressionType.TAG</td>
+</tr>
+</tbody>
+</table>
+<p>在订阅的时候的注意点：</p>
+<pre><code>* 如果subString为null,或者为 * 那么默认该topic下面的所有消息都会被消费。
+* 如果需要订阅多个Tag，那么多个Tag之间使用||分隔，多个tag将会存入tagsSet，tag.hashcode()存入codeSet。
+</code></pre><h4 id="DefaultMQPushConsumer-pullMessage-PullRequest-pullRequest"><a href="#DefaultMQPushConsumer-pullMessage-PullRequest-pullRequest" class="headerlink" title="DefaultMQPushConsumer.pullMessage(PullRequest pullRequest)"></a>DefaultMQPushConsumer.pullMessage(PullRequest pullRequest)</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> SubscriptionData subscriptionData = <span class="keyword">this</span>.rebalanceImpl.getSubscriptionInner().get(pullRequest.getMessageQueue().getTopic());</span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">null</span> == subscriptionData) &#123;</span><br><span class="line">    <span class="keyword">this</span>.executePullRequestLater(pullRequest, PULL_TIME_DELAY_MILLS_WHEN_EXCEPTION);</span><br><span class="line">    log.warn(<span class="string">"find the consumer's subscription failed, &#123;&#125;"</span>, pullRequest);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line">......</span><br><span class="line">......</span><br><span class="line">......</span><br><span class="line">String subExpression = <span class="keyword">null</span>;</span><br><span class="line"><span class="keyword">boolean</span> classFilter = <span class="keyword">false</span>;</span><br><span class="line">SubscriptionData sd = <span class="keyword">this</span>.rebalanceImpl.getSubscriptionInner().get(pullRequest.getMessageQueue().getTopic());</span><br><span class="line"><span class="comment">//上边已经做过判空处理</span></span><br><span class="line"><span class="keyword">if</span> (sd != <span class="keyword">null</span>) &#123;</span><br><span class="line">    <span class="comment">//判断是否每次拉取消息的时候都更新订阅信息。</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span>.defaultMQPushConsumer.isPostSubscriptionWhenPull() &amp;&amp; !sd.isClassFilterMode()) &#123;</span><br><span class="line">        subExpression = sd.getSubString();</span><br><span class="line">    &#125;</span><br><span class="line">    classFilter = sd.isClassFilterMode();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>获取当前consumer所订阅的信息，如果订阅信息为空，直接返回。如果不为空，则判断postSubscriptionWhenPull是否为true, 该参数为是否每次拉取消息的时候都更新订阅信息。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> sysFlag = PullSysFlag.buildSysFlag(</span><br><span class="line">    commitOffsetEnable, <span class="comment">// commitOffset   当前消息的消费进度</span></span><br><span class="line">    <span class="keyword">true</span>, <span class="comment">// suspend 表示消息拉取的时候支持挂起</span></span><br><span class="line">    subExpression != <span class="keyword">null</span>, <span class="comment">// subscription 是否更新订阅信息</span></span><br><span class="line">    classFilter <span class="comment">// class filter     </span></span><br><span class="line">);</span><br></pre></td></tr></table></figure></p>
+<p>计算拉取消息的系统标识<br>之后经过一系列操作开始拉取消息。</p>
+<h3 id="Broker端进行消息过滤"><a href="#Broker端进行消息过滤" class="headerlink" title="Broker端进行消息过滤"></a>Broker端进行消息过滤</h3><p>入口: PullMessageProcessor.processRequest(final Channel channel, RemotingCommand request, boolean brokerAllowSuspend)</p>
+<h4 id="Consumer对Topic过滤信息的创建"><a href="#Consumer对Topic过滤信息的创建" class="headerlink" title="Consumer对Topic过滤信息的创建"></a>Consumer对Topic过滤信息的创建</h4><h5 id="基于请求数据创建"><a href="#基于请求数据创建" class="headerlink" title="基于请求数据创建"></a>基于请求数据创建</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="keyword">boolean</span> hasSubscriptionFlag = PullSysFlag.hasSubscriptionFlag(requestHeader.getSysFlag());</span><br><span class="line"><span class="keyword">if</span> (hasSubscriptionFlag) &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        subscriptionData = FilterAPI.build(</span><br><span class="line">            requestHeader.getTopic(), requestHeader.getSubscription(), requestHeader.getExpressionType()</span><br><span class="line">        );</span><br><span class="line">        <span class="keyword">if</span> (!ExpressionType.isTagType(subscriptionData.getExpressionType())) &#123;</span><br><span class="line">            consumerFilterData = ConsumerFilterManager.build(</span><br><span class="line">                requestHeader.getTopic(), requestHeader.getConsumerGroup(), requestHeader.getSubscription(),</span><br><span class="line">                requestHeader.getExpressionType(), requestHeader.getSubVersion()</span><br><span class="line">            );</span><br><span class="line">            <span class="keyword">assert</span> consumerFilterData != <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">        log.warn(<span class="string">"Parse the consumer's subscription[&#123;&#125;] failed, group: &#123;&#125;"</span>, requestHeader.getSubscription(),</span><br><span class="line">            requestHeader.getConsumerGroup());</span><br><span class="line">        response.setCode(ResponseCode.SUBSCRIPTION_PARSE_FAILED);</span><br><span class="line">        response.setRemark(<span class="string">"parse the consumer's subscription failed"</span>);</span><br><span class="line">        <span class="keyword">return</span> response;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果配置了postSubscriptionWhenPull==true &amp;&amp; 消息过滤不是类过滤模式</p>
+<pre><code>* 判断ExpressionType是否为tag ,如果是那么根据请求信息创建`SubscriptionData`。
+* 否则的话根据请求信息创建 `ConsumerFilterData`
+</code></pre><h5 id="基于注册消息创建"><a href="#基于注册消息创建" class="headerlink" title="基于注册消息创建"></a>基于注册消息创建</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//根据consumerGroupName去查询消费者信息</span></span><br><span class="line">ConsumerGroupInfo consumerGroupInfo =    <span class="keyword">this</span>.brokerController.getConsumerManager().getConsumerGroupInfo(requestHeader.getConsumerGroup());</span><br><span class="line"><span class="comment">//如果消费者信息为空，返回false</span></span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">null</span> == consumerGroupInfo) &#123;</span><br><span class="line">    log.warn(<span class="string">"the consumer's group info not exist, group: &#123;&#125;"</span>, requestHeader.getConsumerGroup());</span><br><span class="line">    response.setCode(ResponseCode.SUBSCRIPTION_NOT_EXIST);</span><br><span class="line">    response.setRemark(<span class="string">"the consumer's group info not exist"</span> + FAQUrl.suggestTodo(FAQUrl.SAME_GROUP_DIFFERENT_TOPIC));</span><br><span class="line">    <span class="keyword">return</span> response;</span><br><span class="line">&#125;</span><br><span class="line">......</span><br><span class="line">......</span><br><span class="line">......</span><br><span class="line"><span class="comment">//从concumerGroup中拿到订阅信息</span></span><br><span class="line">subscriptionData = consumerGroupInfo.findSubscriptionData(requestHeader.getTopic());</span><br><span class="line"><span class="comment">//如果该topic的订阅信息为空，那么返回false</span></span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">null</span> == subscriptionData) &#123;</span><br><span class="line">    log.warn(<span class="string">"the consumer's subscription not exist, group: &#123;&#125;, topic:&#123;&#125;"</span>, requestHeader.getConsumerGroup(), requestHeader.getTopic());</span><br><span class="line">    response.setCode(ResponseCode.SUBSCRIPTION_NOT_EXIST);</span><br><span class="line">    response.setRemark(<span class="string">"the consumer's subscription not exist"</span> + FAQUrl.suggestTodo(FAQUrl.SAME_GROUP_DIFFERENT_TOPIC));</span><br><span class="line">    <span class="keyword">return</span> response;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//如果版本低于请求的版本，那么返回fasle</span></span><br><span class="line"><span class="keyword">if</span> (subscriptionData.getSubVersion() &lt; requestHeader.getSubVersion()) &#123;</span><br><span class="line">    log.warn(<span class="string">"The broker's subscription is not latest, group: &#123;&#125; &#123;&#125;"</span>, requestHeader.getConsumerGroup(),</span><br><span class="line">        subscriptionData.getSubString());</span><br><span class="line">    response.setCode(ResponseCode.SUBSCRIPTION_NOT_LATEST);</span><br><span class="line">    response.setRemark(<span class="string">"the consumer's subscription not latest"</span>);</span><br><span class="line">    <span class="keyword">return</span> response;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//如果 订阅的type不是Tag</span></span><br><span class="line"><span class="keyword">if</span> (!ExpressionType.isTagType(subscriptionData.getExpressionType())) &#123;</span><br><span class="line">    <span class="comment">//从consumerFilter中根据topic以及consumerGroupName查询消费过滤信息</span></span><br><span class="line">    consumerFilterData = <span class="keyword">this</span>.brokerController.getConsumerFilterManager().get(requestHeader.getTopic(),</span><br><span class="line">        requestHeader.getConsumerGroup());</span><br><span class="line">    <span class="comment">//如果为空，返回异常。</span></span><br><span class="line">    <span class="keyword">if</span> (consumerFilterData == <span class="keyword">null</span>) &#123;</span><br><span class="line">        response.setCode(ResponseCode.FILTER_DATA_NOT_EXIST);</span><br><span class="line">        response.setRemark(<span class="string">"The broker's consumer filter data is not exist!Your expression may be wrong!"</span>);</span><br><span class="line">        <span class="keyword">return</span> response;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//如果订阅信息中的客户端版本低于当前请求消息的版本，返回fasle</span></span><br><span class="line">    <span class="comment">//TODO： 这是什么</span></span><br><span class="line">    <span class="keyword">if</span> (consumerFilterData.getClientVersion() &lt; requestHeader.getSubVersion()) &#123;</span><br><span class="line">        log.warn(<span class="string">"The broker's consumer filter data is not latest, group: &#123;&#125;, topic: &#123;&#125;, serverV: &#123;&#125;, clientV: &#123;&#125;"</span>,</span><br><span class="line">            requestHeader.getConsumerGroup(), requestHeader.getTopic(), consumerFilterData.getClientVersion(), requestHeader.getSubVersion());</span><br><span class="line">        response.setCode(ResponseCode.FILTER_DATA_NOT_LATEST);</span><br><span class="line">        response.setRemark(<span class="string">"the consumer's consumer filter data not latest"</span>);</span><br><span class="line">        <span class="keyword">return</span> response;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//如果不是基于tag过滤，同时配置里面又配置了不能基于属性过滤，那么报错。</span></span><br><span class="line"><span class="keyword">if</span> (!ExpressionType.isTagType(subscriptionData.getExpressionType())</span><br><span class="line">    &amp;&amp; !<span class="keyword">this</span>.brokerController.getBrokerConfig().isEnablePropertyFilter()) &#123;</span><br><span class="line">    response.setCode(ResponseCode.SYSTEM_ERROR);</span><br><span class="line">    response.setRemark(<span class="string">"The broker does not support consumer to filter message by "</span> + subscriptionData.getExpressionType());</span><br><span class="line">    <span class="keyword">return</span> response;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从注册信息中查询该topic的订阅信息，并进行验证，详细过程见代码注释。</p>
+<h4 id="根据过滤信息创建过滤类"><a href="#根据过滤信息创建过滤类" class="headerlink" title="根据过滤信息创建过滤类"></a>根据过滤信息创建过滤类</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">MessageFilter messageFilter;</span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">this</span>.brokerController.getBrokerConfig().isFilterSupportRetry()) &#123;</span><br><span class="line">    messageFilter = <span class="keyword">new</span> ExpressionForRetryMessageFilter(subscriptionData, consumerFilterData,</span><br><span class="line">        <span class="keyword">this</span>.brokerController.getConsumerFilterManager());</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    messageFilter = <span class="keyword">new</span> ExpressionMessageFilter(subscriptionData, consumerFilterData,</span><br><span class="line">        <span class="keyword">this</span>.brokerController.getConsumerFilterManager());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>根据配置项filterSupportRetry来决定是创建<code>ExpressionForRetryMessageFilter</code>还是<code>ExpressionMessageFilter</code>，前者支持对重试topic过滤，后者不支持。默认为false。</p>
+<h4 id="拉取消息"><a href="#拉取消息" class="headerlink" title="拉取消息"></a>拉取消息</h4><p>入口: DefaultMessageStore.getMessage()</p>
+<h5 id="根据consumeQueue进行消息过滤"><a href="#根据consumeQueue进行消息过滤" class="headerlink" title="根据consumeQueue进行消息过滤"></a>根据consumeQueue进行消息过滤</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//拿到消息的tagsCode</span></span><br><span class="line"><span class="keyword">long</span> tagsCode = bufferConsumeQueue.getByteBuffer().getLong();</span><br><span class="line"><span class="keyword">boolean</span> extRet = <span class="keyword">false</span>, isTagsCodeLegal = <span class="keyword">true</span>;</span><br><span class="line"><span class="comment">//<span class="doctag">TODO:</span> 暂时不明白什么意思</span></span><br><span class="line"><span class="keyword">if</span> (consumeQueue.isExtAddr(tagsCode)) &#123;</span><br><span class="line">    extRet = consumeQueue.getExt(tagsCode, cqExtUnit);</span><br><span class="line">    <span class="keyword">if</span> (extRet) &#123;</span><br><span class="line">        tagsCode = cqExtUnit.getTagsCode();</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// can't find ext content.Client will filter messages by tag also.</span></span><br><span class="line">        log.error(<span class="string">"[BUG] can't find consume queue extend file content!addr=&#123;&#125;, offsetPy=&#123;&#125;, sizePy=&#123;&#125;, topic=&#123;&#125;, group=&#123;&#125;"</span>,</span><br><span class="line">            tagsCode, offsetPy, sizePy, topic, group);</span><br><span class="line">        isTagsCodeLegal = <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> (messageFilter != <span class="keyword">null</span> </span><br><span class="line">	&amp;&amp; !messageFilter.isMatchedByConsumeQueue(isTagsCodeLegal ? tagsCode : <span class="keyword">null</span>, extRet ? cqExtUnit : <span class="keyword">null</span>)) &#123;</span><br><span class="line">    <span class="keyword">if</span> (getResult.getBufferTotalSize() == <span class="number">0</span>) &#123;</span><br><span class="line">        status = GetMessageStatus.NO_MATCHED_MESSAGE;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">continue</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>TODO: 这里有点疑问，ConsumeQueueExt究竟是什么？<br>如果消息不匹配，直接略过该消息。</p>
+<h5 id="根据commitLog进行消息过滤"><a href="#根据commitLog进行消息过滤" class="headerlink" title="根据commitLog进行消息过滤"></a>根据commitLog进行消息过滤</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (messageFilter != <span class="keyword">null</span></span><br><span class="line">    &amp;&amp; !messageFilter.isMatchedByCommitLog(selectResult.getByteBuffer().slice(), <span class="keyword">null</span>)) &#123;</span><br><span class="line">    <span class="keyword">if</span> (getResult.getBufferTotalSize() == <span class="number">0</span>) &#123;</span><br><span class="line">        status = GetMessageStatus.NO_MATCHED_MESSAGE;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// release...</span></span><br><span class="line">    selectResult.release();</span><br><span class="line">    <span class="keyword">continue</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>根据consueQueue进行消息过滤完之后会根据commitlog进行消息过滤。consumeQueue过滤是基于tag的hashCode的。commitlog过滤的时候如果类型是Tag则直接返回true.</p>
+<h3 id="Consumer拿到过滤后的消息再次进行处理"><a href="#Consumer拿到过滤后的消息再次进行处理" class="headerlink" title="Consumer拿到过滤后的消息再次进行处理"></a>Consumer拿到过滤后的消息再次进行处理</h3><p> 经过上面的几部，broker已经根据consumer的订阅信息对消息进行拉取过滤，并返回给了consumer, 但是因为broker的tag过滤是基于hashCode的，所以并不是很准。在consumer拿到消息之后，会再次进行过滤。<br> <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pullResult = DefaultMQPushConsumerImpl.<span class="keyword">this</span>.pullAPIWrapper.processPullResult(pullRequest.getMessageQueue(), </span><br><span class="line">pullResult, subscriptionData);</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//解析消息</span></span><br><span class="line">ByteBuffer byteBuffer = ByteBuffer.wrap(pullResultExt.getMessageBinary());</span><br><span class="line">List&lt;MessageExt&gt; msgList = MessageDecoder.decodes(byteBuffer);</span><br><span class="line">List&lt;MessageExt&gt; msgListFilterAgain = msgList;</span><br><span class="line"><span class="keyword">if</span> (!subscriptionData.getTagsSet().isEmpty() &amp;&amp; !subscriptionData.isClassFilterMode()) &#123;</span><br><span class="line">    msgListFilterAgain = <span class="keyword">new</span> ArrayList&lt;MessageExt&gt;(msgList.size());</span><br><span class="line">    <span class="keyword">for</span> (MessageExt msg : msgList) &#123;</span><br><span class="line">        <span class="keyword">if</span> (msg.getTags() != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (subscriptionData.getTagsSet().contains(msg.getTags())) &#123;</span><br><span class="line">                msgListFilterAgain.add(msg);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这次过滤是从msg的properties中拿到tag的真实值。<br>到这里基于tag的消息过滤已经完成。</p>
+<h2 id="SQL92过滤"><a href="#SQL92过滤" class="headerlink" title="SQL92过滤"></a>SQL92过滤</h2><p>TODO：</p>
+<h2 id="类表达式过滤"><a href="#类表达式过滤" class="headerlink" title="类表达式过滤"></a>类表达式过滤</h2><p>TODO：</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/RocketMQ/" rel="tag"># RocketMQ</a>
+          
+            <a href="/tags/消息中间件/" rel="tag"># 消息中间件</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/03/28/RocketMQ同-异步刷盘以及故障恢复/" rel="next" title="RocketMQ同/异步刷盘以及故障恢复">
+                <i class="fa fa-chevron-left"></i> RocketMQ同/异步刷盘以及故障恢复
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/head_image.png"
+                alt="斑马" />
+            
+              <p class="site-author-name" itemprop="name">斑马</p>
+              <p class="site-description motion-element" itemprop="description">你不要睡着了</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">6</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/xyjspace" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:21409714@qq.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.xiefayang.com" title="i蝸居年華_谢谢谢" target="_blank">i蝸居年華_谢谢谢</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Tag表达式过滤"><span class="nav-number">2.</span> <span class="nav-text">Tag表达式过滤</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Consumer端对过滤信息初步处理"><span class="nav-number">2.1.</span> <span class="nav-text">Consumer端对过滤信息初步处理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#创建Consumer-订阅topic以及消息表达式"><span class="nav-number">2.1.1.</span> <span class="nav-text">创建Consumer,订阅topic以及消息表达式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DefaultMQPushConsumer-pullMessage-PullRequest-pullRequest"><span class="nav-number">2.1.2.</span> <span class="nav-text">DefaultMQPushConsumer.pullMessage(PullRequest pullRequest)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Broker端进行消息过滤"><span class="nav-number">2.2.</span> <span class="nav-text">Broker端进行消息过滤</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Consumer对Topic过滤信息的创建"><span class="nav-number">2.2.1.</span> <span class="nav-text">Consumer对Topic过滤信息的创建</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#基于请求数据创建"><span class="nav-number">2.2.1.1.</span> <span class="nav-text">基于请求数据创建</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#基于注册消息创建"><span class="nav-number">2.2.1.2.</span> <span class="nav-text">基于注册消息创建</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#根据过滤信息创建过滤类"><span class="nav-number">2.2.2.</span> <span class="nav-text">根据过滤信息创建过滤类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#拉取消息"><span class="nav-number">2.2.3.</span> <span class="nav-text">拉取消息</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#根据consumeQueue进行消息过滤"><span class="nav-number">2.2.3.1.</span> <span class="nav-text">根据consumeQueue进行消息过滤</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#根据commitLog进行消息过滤"><span class="nav-number">2.2.3.2.</span> <span class="nav-text">根据commitLog进行消息过滤</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Consumer拿到过滤后的消息再次进行处理"><span class="nav-number">2.3.</span> <span class="nav-text">Consumer拿到过滤后的消息再次进行处理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SQL92过滤"><span class="nav-number">3.</span> <span class="nav-text">SQL92过滤</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#类表达式过滤"><span class="nav-number">4.</span> <span class="nav-text">类表达式过滤</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 &mdash; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">斑马</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.7.1</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Muse</a> v6.3.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.3.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.3.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.3.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'rYwUgHvNR0gs6G3tecTA4TGB-gzGzoHsz',
+        appKey: 'fWcscBws5bQ6QjCfC9S7knPc',
+        placeholder: 'Just go go',
+        avatar:'identicon',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
