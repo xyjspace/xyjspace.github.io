@@ -108,30 +108,25 @@
 
 
 
-  <meta name="description" content="前言今天在阅读Redsi集群的时候，看到Node之间建立通信需要经历handshake阶段，阅读下来发现Redis的handshake与http建立连接的三次握手有些相似。因为从未整理过http通信的知识，这里再好好回顾一下。">
-<meta name="keywords" content="TCP">
+  <meta name="description" content="耗子叔发起的ARTS计划，第二周。ARTS计划简介：  https://time.geekbang.org/column/article/85839?from=singlemessage">
+<meta name="keywords" content="ARTS">
 <meta property="og:type" content="article">
-<meta property="og:title" content="TCP三次握手与四次握手">
-<meta property="og:url" content="http://yoursite.com/2019/02/23/TCP三次握手与四次握手/index.html">
+<meta property="og:title" content="ARTS-第二周">
+<meta property="og:url" content="http://yoursite.com/2019/03/31/ARTS-第二周/index.html">
 <meta property="og:site_name" content="斑马のCODE_HOME">
-<meta property="og:description" content="前言今天在阅读Redsi集群的时候，看到Node之间建立通信需要经历handshake阶段，阅读下来发现Redis的handshake与http建立连接的三次握手有些相似。因为从未整理过http通信的知识，这里再好好回顾一下。">
+<meta property="og:description" content="耗子叔发起的ARTS计划，第二周。ARTS计划简介：  https://time.geekbang.org/column/article/85839?from=singlemessage">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="http://yoursite.com/2019/02/23/TCP三次握手与四次握手/三次握手.png">
-<meta property="og:image" content="http://yoursite.com/2019/02/23/TCP三次握手与四次握手/四次握手.png">
-<meta property="og:image" content="en-resource://database/460:1">
-<meta property="og:image" content="http://yoursite.com/2019/02/23/TCP三次握手与四次握手/demo.png">
-<meta property="og:updated_time" content="2019-02-23T13:03:59.512Z">
+<meta property="og:updated_time" content="2019-03-31T14:05:55.333Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="TCP三次握手与四次握手">
-<meta name="twitter:description" content="前言今天在阅读Redsi集群的时候，看到Node之间建立通信需要经历handshake阶段，阅读下来发现Redis的handshake与http建立连接的三次握手有些相似。因为从未整理过http通信的知识，这里再好好回顾一下。">
-<meta name="twitter:image" content="http://yoursite.com/2019/02/23/TCP三次握手与四次握手/三次握手.png">
+<meta name="twitter:title" content="ARTS-第二周">
+<meta name="twitter:description" content="耗子叔发起的ARTS计划，第二周。ARTS计划简介：  https://time.geekbang.org/column/article/85839?from=singlemessage">
 
 
 
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2019/02/23/TCP三次握手与四次握手/"/>
+  <link rel="canonical" href="http://yoursite.com/2019/03/31/ARTS-第二周/"/>
 
 
 
@@ -141,7 +136,7 @@
   };
 </script>
 
-  <title>TCP三次握手与四次握手 | 斑马のCODE_HOME</title>
+  <title>ARTS-第二周 | 斑马のCODE_HOME</title>
   
 
 
@@ -322,7 +317,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/02/23/TCP三次握手与四次握手/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/31/ARTS-第二周/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="斑马">
@@ -339,7 +334,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">TCP三次握手与四次握手
+          <h1 class="post-title" itemprop="name headline">ARTS-第二周
               
             
           </h1>
@@ -364,7 +359,7 @@
                 
               
 
-              <time title="创建时间：2019-02-23 20:57:24" itemprop="dateCreated datePublished" datetime="2019-02-23T20:57:24+08:00">2019-02-23</time>
+              <time title="创建时间：2019-03-31 22:05:07" itemprop="dateCreated datePublished" datetime="2019-03-31T22:05:07+08:00">2019-03-31</time>
             
 
             
@@ -382,7 +377,7 @@
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/TCP/" itemprop="url" rel="index"><span itemprop="name">TCP</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/ARTS/" itemprop="url" rel="index"><span itemprop="name">ARTS</span></a></span>
 
                 
                 
@@ -397,8 +392,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2019/02/23/TCP三次握手与四次握手/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/02/23/TCP三次握手与四次握手/" itemprop="commentCount"></span>
+                <a href="/2019/03/31/ARTS-第二周/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/03/31/ARTS-第二周/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -426,70 +421,79 @@
       
 
       
-        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>今天在阅读Redsi集群的时候，看到Node之间建立通信需要经历<code>handshake</code>阶段，阅读下来发现Redis的<code>handshake</code>与http建立连接的三次握手有些相似。因为从未整理过http通信的知识，这里再好好回顾一下。<br><a id="more"></a></p>
-<p>首先要明白为什么http建立连接需要的通信次数是三次，而不是一次，两次，四次？</p>
-<h4 id="为什么要使用三次握手"><a href="#为什么要使用三次握手" class="headerlink" title="为什么要使用三次握手"></a>为什么要使用三次握手</h4><p>比如我们有两台机器:A和B。我们要在这两台机器上建立通信。</p>
-<h5 id="一次通信"><a href="#一次通信" class="headerlink" title="一次通信"></a>一次通信</h5><p>A-&gt;B<br>A告诉B我要向你发送数据了。如果B接受成功倒还好，如果B接受不成功，而且A并不知道B接受不成功，那么A不知道到底要不要与B之间进行通信。</p>
-<h5 id="两次通信"><a href="#两次通信" class="headerlink" title="两次通信"></a>两次通信</h5><p>A-&gt;B<br>B–&gt;A<br>与一次通信不同的是，B在接收了A的消息之后，会告诉A我已经收到了消息。这个时候A知道A与B之间的连接是OK的，会继续发送消息。<br>从理论上来讲这种情况是合理的，那为什么要浪费第三次通信呢？<br>原因是因为：这样可以防止失效请求报文又传递给服务器，因而产生错误。</p>
+        <p>耗子叔发起的ARTS计划，第二周。<br>ARTS计划简介：</p>
 <blockquote>
-<p>例如，A给B发送了一条SYN报文，但是该报文因为某种原因阻塞在了网络节点中，但是并没有消失，导致该报文在A延迟释放连接后的某个时间内才到达B。如果没有第三次通信，那么在B接收到报文后，B向A发送ACK回复，并且开始等待数据。但是A已经不会再向B发送任何数据了。所以B就会造成资源的浪费。</p>
+<p><a href="https://time.geekbang.org/column/article/85839?from=singlemessage" target="_blank" rel="noopener">https://time.geekbang.org/column/article/85839?from=singlemessage</a><br><a id="more"></a></p>
 </blockquote>
-<h5 id="三次通信"><a href="#三次通信" class="headerlink" title="三次通信"></a>三次通信</h5><p>A -&gt; B<br>B –&gt; A<br>A —&gt; B<br>因为两次通信可能会造成A不通的问题，在那么在B回复A之后，A再回复一下B， B就知道A也是可用的了。<br>三次握手的图片：(摘自网上)<br><img src="/2019/02/23/TCP三次握手与四次握手/三次握手.png" alt="三次握手.png"></p>
-<h4 id="为什么关闭连接需要四次握手"><a href="#为什么关闭连接需要四次握手" class="headerlink" title="为什么关闭连接需要四次握手"></a>为什么关闭连接需要四次握手</h4><p>首先要了解一个概念： TCP是全双工通信的。<br>那么为了实现可靠的关闭，必须要分别断开连接。如果A向B发送了一条数据，当A发送完毕之后就关闭与B的连接，那么可能会造成数据发送一半连接就关闭了。</p>
-<p>原理：<br>当A向B发送了FIN的报文后，那么将不会再向B发送数据。但是可以接受来自B的信息。当B返回A ack的时候，A就知道B已经接受完信息，开始等待B的FIN了。当B接受完信息或者也没有信息发送给A的时候，B执行被动关闭向A发送FIN请求。</p>
-<p>如图所示：(摘自网上)<br><img src="/2019/02/23/TCP三次握手与四次握手/四次握手.png" alt="四次握手.png"></p>
-<h4 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h4><p>使用tcpdum的抓包数据如下图所示：</p>
-<blockquote>
-<p>tcpdump -i eth0 port 11111  意思是抓取所有源端口与目标端口为11111的包  </p>
-</blockquote>
-<p><img src="en-resource://database/460:1" alt="89a626b1e8ae5b07dfb821c98699aac6.png"></p>
-<p>上图是一次telnet ip port 过程中服务端所抓到的数据包，除去中间画框的两个数据，上边的三个数据包，以及下边的四个数据包分别对应连接的三次握手和断开连接的四次握手。</p>
-<h6 id="此次连接的详细说明"><a href="#此次连接的详细说明" class="headerlink" title="此次连接的详细说明"></a>此次连接的详细说明</h6><ol>
-<li>182向服务端发送一个标识符为<code>SYN</code>的请求，并指明序号为<code>488441269</code>。</li>
-<li>服务端接收到了请求并向182发送了 标识符为<code>SYN</code>的数据报文作为应答。序号为<code>3336955853</code>，并且附加一个确认号为 seq+1 ： <code>488441270</code></li>
-<li>客户端将收到的确认号与自身的序号+1比较，如果相同，则返回一个确认号：<code>3336955854</code></li>
+<h4 id="A"><a href="#A" class="headerlink" title="A"></a>A</h4><p><strong>leetcode题库中第692题：前K个高频单词</strong></p>
+<hr>
+<p>给一非空的单词列表，返回前 k 个出现次数最多的单词。返回的答案应该按单词出现频率由高到低排序。如果不同的单词有相同出现频率，按字母顺序排序。</p>
+<h5 id="示例"><a href="#示例" class="headerlink" title="示例:"></a>示例:</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">输入: [&quot;i&quot;, &quot;love&quot;, &quot;leetcode&quot;, &quot;i&quot;, &quot;love&quot;, &quot;coding&quot;], k = 2</span><br><span class="line">输出: [&quot;i&quot;, &quot;love&quot;]</span><br><span class="line">解析: &quot;i&quot; 和 &quot;love&quot; 为出现次数最多的两个单词，均为2次。</span><br><span class="line">    注意，按字母顺序 &quot;i&quot; 在 &quot;love&quot; 之前。</span><br><span class="line">    </span><br><span class="line"></span><br><span class="line">输入: [&quot;the&quot;, &quot;day&quot;, &quot;is&quot;, &quot;sunny&quot;, &quot;the&quot;, &quot;the&quot;, &quot;the&quot;, &quot;sunny&quot;, &quot;is&quot;, &quot;is&quot;], k = 4</span><br><span class="line">输出: [&quot;the&quot;, &quot;is&quot;, &quot;sunny&quot;, &quot;day&quot;]</span><br><span class="line">解析: &quot;the&quot;, &quot;is&quot;, &quot;sunny&quot; 和 &quot;day&quot; 是出现次数最多的四个单词，</span><br><span class="line">    出现次数依次为 4, 3, 2 和 1 次。</span><br></pre></td></tr></table></figure>
+<h5 id="说明："><a href="#说明：" class="headerlink" title="说明："></a>说明：</h5><ol>
+<li>假定 k 总为有效值， 1 ≤ k ≤ 集合元素数。</li>
+<li>输入的单词均由小写字母组成。</li>
 </ol>
-<h6 id="TCP报文格式"><a href="#TCP报文格式" class="headerlink" title="TCP报文格式"></a>TCP报文格式</h6><p><img src="/2019/02/23/TCP三次握手与四次握手/demo.png" alt="demo.png"><br>其中标志位总共有六个</p>
-<table>
-<thead>
-<tr>
-<th>标志位</th>
-<th>解释</th>
-<th>标志位</th>
-<th>解释</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>URG</td>
-<td>紧急指针有效</td>
-<td>ACK</td>
-<td>确认序号</td>
-</tr>
-<tr>
-<td>PSH</td>
-<td>接受方应该尽快将报文交还应用方</td>
-<td>SYN</td>
-<td>发起一个连接</td>
-</tr>
-<tr>
-<td>FIN</td>
-<td>释放一个连接</td>
-<td>RST</td>
-<td>重置连接</td>
-</tr>
-</tbody>
-</table>
-<p>其中S,F,P,<code>.</code> 可以在报文首部看到。 R和Ack用作在tcpdum中作特殊显示。</p>
-<h6 id="win4096"><a href="#win4096" class="headerlink" title="win4096"></a>win4096</h6><p>win4096代表连接的窗口大小，因为传输的数据为0，所以窗口也被设置为了默认的4096.</p>
-<h5 id="mss1426"><a href="#mss1426" class="headerlink" title="mss1426"></a>mss1426</h5><p>代表了发送端指明的最大报文段长度。</p>
-<p>TCP/IP详解卷一：协议在线阅读地址</p>
+<h5 id="解答："><a href="#解答：" class="headerlink" title="解答："></a>解答：</h5><p><strong>思路</strong><br>计算top-n分为两步:</p>
+<ol>
+<li>统计:  创建一个LinkedHashMap&lt;String, Integer&gt;，遍历字符数组，如果字符串在map中不存在，那么添加，设置Integer为1。 如果字符串已经存在，那么取出Integer并且增加1</li>
+<li>排序:  当遍历完毕后，对Map进行排序，取出前K个值返回。</li>
+</ol>
+<p>统计过程需要的算法时间复杂度为0(N)<br>关键还在于排序算法的选取。</p>
 <blockquote>
-<p><a href="http://www.52im.net/topic-tcpipvol1.html" target="_blank" rel="noopener">http://www.52im.net/topic-tcpipvol1.html</a></p>
+<p>发现选的算法题有点难。。。先把排序算法过滤一遍再写。。</p>
 </blockquote>
-<p>网上文章的地址:</p>
+<h4 id="R"><a href="#R" class="headerlink" title="R"></a>R</h4><p>Sentinel的核心概念:</p>
+<ul>
+<li><p>Resource </p>
 <blockquote>
-<p><a href="https://www.jianshu.com/p/e7f45779008a" target="_blank" rel="noopener">https://www.jianshu.com/p/e7f45779008a</a><br><a href="https://www.jianshu.com/p/a1ebc61ce141" target="_blank" rel="noopener">https://www.jianshu.com/p/a1ebc61ce141</a></p>
+<p>  任何都可以被定义为一个Resource,比如一个服务，一个方法，甚至是一个代码片段。<br>  如果被Sentinel的API定义为一个Resource,那么它可以使用Sentinel提供的保护方法。</p>
+</blockquote>
+</li>
+<li><p>Rules</p>
+<blockquote>
+<p>Sentinel通过使用Rules来定义保护资源的方法，比如流控，并发，熔断。Rules可以动态改变，并且实时生效。</p>
+</blockquote>
+</li>
+</ul>
+<h5 id="流控的原则"><a href="#流控的原则" class="headerlink" title="流控的原则"></a>流控的原则</h5><p>流量控制基于以下角度：</p>
+<ol>
+<li>资源的调用链路。</li>
+<li>运行时的指标，比如QPS，系统负载，请求响应时长。</li>
+<li>期望触发的动作，比如拒绝或者对请求进行排队。<br>Sentinel理想是让用户自由选择控制角度，灵活组合，以达到想要的效果。</li>
+</ol>
+<h5 id="熔断"><a href="#熔断" class="headerlink" title="熔断"></a>熔断</h5><p>熔断被用来检测错误和封装一些逻辑去防止一些可能在维护期频繁出现的故障，或者是临时的系统故障，或者是一些不期望发生的故障。<br>为了解决这个问题，Hystrix选择使用线程和线程池来实现资源之间的隔离。使用线程池的主要好处就是隔离是很干净的。<br>Sentinel使用了不同的方式：</p>
+<ul>
+<li><p>控制最大的并发线程：<br>  为了替代使用线程此，Sentinel通过严格的限制并发线程的数量，来减少不稳定资源带来的影响。<br>  当资源的响应时间变长，线程将会被占据。当线程累计到一定的数量的时候，新到来的请求将会被拒绝。反而言之，当资源恢复，重新变的稳定的时候，被占据的线程将会得到释放，新的请求将会被接收。<br>  通过限制最大并发线程数量代替线程池，不需要再提前分配线程，也可以避免计算开销，比如排队，任务调度和线程上下文切换。。<br>  <strong>完全看不懂啊，这翻译的，线程池和最大的并发线程有啥区别啊？怎么就避免线程切换开销了</strong></p>
+</li>
+<li><p>根据响应时间来控制:<br>除了限制并发线程数，根据响应时间来对不稳定资源进行降级处理也是一种有效的途径去实现熔断。当一个请求的响应时间太长，在一个指定的时间窗口内所有的请求将都会被拒绝。</p>
+<h5 id="负载保护"><a href="#负载保护" class="headerlink" title="负载保护"></a>负载保护</h5><p>Sentinel可以保护我们的系统防止我们的系统负载过高。它可以帮助我们使我们的系统负载以及请求达到一个平衡，让系统保持一个比较高的处理速度。</p>
+<h5 id="Sentinel如何工作？"><a href="#Sentinel如何工作？" class="headerlink" title="Sentinel如何工作？"></a>Sentinel如何工作？</h5><ol>
+<li>提供API接口适配一些常用的第三方框架来定义资源。</li>
+<li>收集运行时信息，跟踪调用资源时的路径。</li>
+<li>定义一些实时规则。</li>
+<li>提供实时监控，一些拓展规则的配置。</li>
+</ol>
+</li>
+</ul>
+<h4 id="T"><a href="#T" class="headerlink" title="T"></a>T</h4><p>今天去蚂蚁金服听了泽胤大神分享的《高效推送服务的架构思考》，收货挺大的。<br>总结几个点:</p>
+<ol>
+<li><p>因为系统SLA的不同，所以系统的侧重点不同。</p>
+<blockquote>
+<p> 如果系统要求SLA高，那么必须让服务保持高稳定性，因此系统的负载不能过高。如果系统要求SLA低，那么可以让服务保持满负荷。可以通过使用MQ来实现此类系统的解耦。</p>
+</blockquote>
+</li>
+<li><p>引入MQ，将API与后台服务之间的调用从同步改为异步，可以大大提高API的性能，以及稳定性。</p>
+</li>
+<li>引入MQ后，只是将API的流量转接给了MQ，例如本来API要处理100W条推送，那么在接入MQ后，API仍旧要发送消息，只是会把消息发送给MQ。 MQ也不可能瞬间处理这么高的QPS，需要将消息在内存中打批，通过批处理的形式传送给MQ。因为请求会在内存中打批，所以可能会出现请求丢失的问题。这个问题他们现在也没有更好的解决方案。</li>
+<li>因为引入MQ，所以需要考虑幂等性的处理。解决方案为每次请求有一个唯一ID，通过redis来校验消息是否重复。</li>
+<li>因为不同业务，可能有不同的优先级，所以对不同优先级的消息推送建立不同的topic，通过订阅不同的topic来处理不同优先级的消息。</li>
+<li>消息如果消费失败，那么不应该返回fasle，这样的话在RocketMQ中会因为会进行消息重投，导致后续消息被延迟消费。正确的做法应该是将失败消息转发到另外一个队列中，另外一个队列专门用来处理这些消费失败的消息。</li>
+<li>topic以及tag的划分应该以消息的规模，消息的大小这两个维度来进行划分。</li>
+</ol>
+<p>大致回忆出了七条使用MQ要注意的点。这是一个真实的使用MQ来进行系统间解耦的案例，很值得借鉴以及学习，分享很棒。</p>
+<h4 id="S"><a href="#S" class="headerlink" title="S"></a>S</h4><p>简单介绍一下RocketMQ的消息过滤实现原理，参考丁威老师的《RocketMQ技术内幕》。<br>地址为:</p>
+<blockquote>
+<p><a href="http://www.xunyajie.com/2019/03/30/RocketMQ%E6%B6%88%E6%81%AF%E8%BF%87%E6%BB%A4%E5%88%86%E6%9E%90/" target="_blank" rel="noopener">http://www.xunyajie.com/2019/03/30/RocketMQ%E6%B6%88%E6%81%AF%E8%BF%87%E6%BB%A4%E5%88%86%E6%9E%90/</a></p>
 </blockquote>
 
       
@@ -511,7 +515,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/TCP/" rel="tag"># TCP</a>
+            <a href="/tags/ARTS/" rel="tag"># ARTS</a>
           
         </div>
       
@@ -524,8 +528,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/02/18/Redis主从复制原理/" rel="next" title="Redis主从复制原理">
-                <i class="fa fa-chevron-left"></i> Redis主从复制原理
+              <a href="/2019/03/30/RocketMQ消息过滤分析/" rel="next" title="RocketMQ消息过滤分析">
+                <i class="fa fa-chevron-left"></i> RocketMQ消息过滤分析
               </a>
             
           </div>
@@ -533,10 +537,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2019/02/24/JVM类加载机制/" rel="prev" title="JVM类加载机制">
-                JVM类加载机制 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -739,7 +739,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#为什么要使用三次握手"><span class="nav-number">1.1.</span> <span class="nav-text">为什么要使用三次握手</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#一次通信"><span class="nav-number">1.1.1.</span> <span class="nav-text">一次通信</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#两次通信"><span class="nav-number">1.1.2.</span> <span class="nav-text">两次通信</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#三次通信"><span class="nav-number">1.1.3.</span> <span class="nav-text">三次通信</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#为什么关闭连接需要四次握手"><span class="nav-number">1.2.</span> <span class="nav-text">为什么关闭连接需要四次握手</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#例子"><span class="nav-number">1.3.</span> <span class="nav-text">例子</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#此次连接的详细说明"><span class="nav-number">1.3.0.1.</span> <span class="nav-text">此次连接的详细说明</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#TCP报文格式"><span class="nav-number">1.3.0.2.</span> <span class="nav-text">TCP报文格式</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#win4096"><span class="nav-number">1.3.0.3.</span> <span class="nav-text">win4096</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#mss1426"><span class="nav-number">1.3.1.</span> <span class="nav-text">mss1426</span></a></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#A"><span class="nav-number">1.</span> <span class="nav-text">A</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#示例"><span class="nav-number">1.1.</span> <span class="nav-text">示例:</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#说明："><span class="nav-number">1.2.</span> <span class="nav-text">说明：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#解答："><span class="nav-number">1.3.</span> <span class="nav-text">解答：</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#R"><span class="nav-number">2.</span> <span class="nav-text">R</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#流控的原则"><span class="nav-number">2.1.</span> <span class="nav-text">流控的原则</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#熔断"><span class="nav-number">2.2.</span> <span class="nav-text">熔断</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#负载保护"><span class="nav-number">2.3.</span> <span class="nav-text">负载保护</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Sentinel如何工作？"><span class="nav-number">2.4.</span> <span class="nav-text">Sentinel如何工作？</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#T"><span class="nav-number">3.</span> <span class="nav-text">T</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#S"><span class="nav-number">4.</span> <span class="nav-text">S</span></a></li></ol></div>
             
 
           </div>
