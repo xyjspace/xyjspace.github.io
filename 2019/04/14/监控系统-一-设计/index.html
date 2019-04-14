@@ -108,23 +108,26 @@
 
 
 
-  <meta name="description" content="你不要睡着了">
-<meta property="og:type" content="website">
-<meta property="og:title" content="斑马のCODE_HOME">
-<meta property="og:url" content="http://yoursite.com/tags/JVM/index.html">
+  <meta name="description" content="截止目前，我已经学习了很多技术，包括消息队列，logstash，Redis, Sharding-Jdbc，Elasticsearch, zipkin， hadoop生态圈。但是都只限于学，以至于很多时候在学习完之后不久就忘掉了。为了解决这个问题，我决定用当前所学习的知识去搭建一套消息监控系统，在复习自己的知识的同时，也给同事带来一点便捷。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="监控系统 (一) : 设计">
+<meta property="og:url" content="http://yoursite.com/2019/04/14/监控系统-一-设计/index.html">
 <meta property="og:site_name" content="斑马のCODE_HOME">
-<meta property="og:description" content="你不要睡着了">
+<meta property="og:description" content="截止目前，我已经学习了很多技术，包括消息队列，logstash，Redis, Sharding-Jdbc，Elasticsearch, zipkin， hadoop生态圈。但是都只限于学，以至于很多时候在学习完之后不久就忘掉了。为了解决这个问题，我决定用当前所学习的知识去搭建一套消息监控系统，在复习自己的知识的同时，也给同事带来一点便捷。">
 <meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://yoursite.com/2019/04/14/监控系统-一-设计/系统设计.png">
+<meta property="og:updated_time" content="2019-04-14T12:54:50.092Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="斑马のCODE_HOME">
-<meta name="twitter:description" content="你不要睡着了">
+<meta name="twitter:title" content="监控系统 (一) : 设计">
+<meta name="twitter:description" content="截止目前，我已经学习了很多技术，包括消息队列，logstash，Redis, Sharding-Jdbc，Elasticsearch, zipkin， hadoop生态圈。但是都只限于学，以至于很多时候在学习完之后不久就忘掉了。为了解决这个问题，我决定用当前所学习的知识去搭建一套消息监控系统，在复习自己的知识的同时，也给同事带来一点便捷。">
+<meta name="twitter:image" content="http://yoursite.com/2019/04/14/监控系统-一-设计/系统设计.png">
 
 
 
 
 
 
-  <link rel="canonical" href="http://yoursite.com/tags/JVM/"/>
+  <link rel="canonical" href="http://yoursite.com/2019/04/14/监控系统-一-设计/"/>
 
 
 
@@ -134,7 +137,7 @@
   };
 </script>
 
-  <title>标签: JVM | 斑马のCODE_HOME</title>
+  <title>监控系统 (一) : 设计 | 斑马のCODE_HOME</title>
   
 
 
@@ -181,7 +184,7 @@
     
   
 
-  <div class="container sidebar-position-right ">
+  <div class="container sidebar-position-right page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -238,7 +241,7 @@
         
         
           
-          <li class="menu-item menu-item-tags menu-item-active">
+          <li class="menu-item menu-item-tags">
     <a href="/tags/" rel="section">
       <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
   </li>
@@ -275,31 +278,6 @@
   
     
 
-    
-    
-      
-      
-    
-      
-      
-    
-      
-      
-    
-      
-      
-    
-      
-      
-    
-      
-      
-    
-    
-
-  
-
-
   
 
   
@@ -324,86 +302,231 @@
           <div id="content" class="content">
             
 
-  
-  
-  
-  <div class="post-block tag">
+  <div id="posts" class="posts-expand">
+    
 
-    <div id="posts" class="posts-collapse">
-      <div class="collection-title">
-        <h1>JVM<small>标签</small>
-        </h1>
-      </div>
+  
 
-      
-        
+  
+  
+  
+
+  
 
   <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/04/14/监控系统-一-设计/">
 
-      <h2 class="post-title">
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="斑马">
+      <meta itemprop="description" content="你不要睡着了">
+      <meta itemprop="image" content="/uploads/head_image.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="斑马のCODE_HOME">
+    </span>
+
+    
+      <header class="post-header">
+
         
-            <a class="post-title-link" href="/2019/02/24/JVM类加载机制/" itemprop="url">
-              
-                <span itemprop="name">JVM类加载机制</span>
-              
-            </a>
         
-      </h2>
+          <h1 class="post-title" itemprop="name headline">监控系统 (一) : 设计
+              
+            
+          </h1>
+        
 
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2019-02-24T23:00:53+08:00"
-              content="2019-02-24" >
-          02-24
-        </time>
-      </div>
+        <div class="post-meta">
+          <span class="post-time">
 
-    </header>
-  </article>
+            
+            
+            
 
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-04-14 20:51:25" itemprop="dateCreated datePublished" datetime="2019-04-14T20:51:25+08:00">2019-04-14</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/监控/" itemprop="url" rel="index"><span itemprop="name">监控</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/04/14/监控系统-一-设计/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/04/14/监控系统-一-设计/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-        
+      
 
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2019/02/17/JVM字节码内存分布/" itemprop="url">
-              
-                <span itemprop="name">JVM字节码内存分布</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2019-02-17T21:49:43+08:00"
-              content="2019-02-17" >
-          02-17
-        </time>
-      </div>
-
-    </header>
-  </article>
-
+      
+        <p>截止目前，我已经学习了很多技术，包括消息队列，logstash，Redis, Sharding-Jdbc，Elasticsearch, zipkin， hadoop生态圈。但是都只限于学，以至于很多时候在学习完之后不久就忘掉了。为了解决这个问题，我决定用当前所学习的知识去搭建一套消息监控系统，在复习自己的知识的同时，也给同事带来一点便捷。<br><a id="more"></a></p>
+<h4 id="系统要解决什么问题"><a href="#系统要解决什么问题" class="headerlink" title="系统要解决什么问题"></a>系统要解决什么问题</h4><p>当线上系统出现故障的时候主动通知对应系统负责人，以第一时间拿到错误信息进行修复。<br>故障包含但不限于：</p>
+<ol>
+<li>业务异常 : 由我们定义的日志，例如请求超时。</li>
+<li>技术异常 : error级别的日志，不在我们定义中的非业务异常，例如数组越界，空指针等。</li>
+</ol>
+<h4 id="通知的途径"><a href="#通知的途径" class="headerlink" title="通知的途径"></a>通知的途径</h4><ol>
+<li>钉钉通知 @负责人，已达到消息提示的目的。</li>
+<li>邮件通知。</li>
+<li>短信通知，但是短信不易过多，应当整合之后发送，否则在大批量出错的时候会让我们的短信比较杂乱。</li>
+</ol>
+<h4 id="系统设计"><a href="#系统设计" class="headerlink" title="系统设计"></a>系统设计</h4><h5 id="思路一"><a href="#思路一" class="headerlink" title="思路一"></a>思路一</h5><p>在一开始我的想法是，写一个Starter工具包，由各个小组依赖，在打印warn级别日志的时候，调用方法去通知。<br>缺点很明显：</p>
+<ol>
+<li>与业务代码高度耦合，侵入性非常高。</li>
+<li>如果想要监听新的异常需要修改代码，重新发布，不灵活。</li>
+<li><p>需要思考如何编写才能对业务系统所在服务器的性能影响达到最低。<br>这个方案在思考之后直接被pass。</p>
+<h5 id="思路二"><a href="#思路二" class="headerlink" title="思路二"></a>思路二</h5><p>专门开发一个监控系统。  架构如图:<br><img src="/2019/04/14/监控系统-一-设计/系统设计.png" alt="系统架构.png"></p>
+</li>
+<li><p>由logstash去监听各个系统的日志，经过filter转换之后丢到消息队列中去。</p>
+</li>
+<li>监控系统监听指定topic，对消息进行消费。</li>
+<li>发送到不同的监控工具中。</li>
+</ol>
+<p>这个思路感觉还可以，</p>
+<ol>
+<li>首先做到了无侵入。</li>
+<li>因为使用了消息队列进行解耦，可以水平扩容。</li>
+<li>监控规则可以由各个系统的开发人员自行定义。</li>
+</ol>
+<h4 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h4><p>思路二带来的一些问题</p>
+<ol>
+<li>规则在哪里进行配置，是通过logstash配置，还是在监控系统配置？</li>
+<li>如何动态增加监控的系统？</li>
+<li>当监控规则发生变化如何让监控系统做到实时感知？</li>
+<li>钉钉的消息发送因为有20/m的限制，我们代码如何处理。</li>
+<li>消息消费使用广播模式还是集群模式？</li>
+<li>topic与tag如何设计？</li>
+</ol>
 
       
     </div>
 
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/03/31/ARTS-第二周/" rel="next" title="ARTS-第二周">
+                <i class="fa fa-chevron-left"></i> ARTS-第二周
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
   </div>
   
   
   
+  </article>
 
-  
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
           
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
 
         </div>
         
@@ -424,8 +547,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -559,6 +691,22 @@
       </section>
 
       
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#系统要解决什么问题"><span class="nav-number">1.</span> <span class="nav-text">系统要解决什么问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#通知的途径"><span class="nav-number">2.</span> <span class="nav-text">通知的途径</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#系统设计"><span class="nav-number">3.</span> <span class="nav-text">系统设计</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#思路一"><span class="nav-number">3.1.</span> <span class="nav-text">思路一</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#思路二"><span class="nav-number">3.2.</span> <span class="nav-text">思路二</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#问题"><span class="nav-number">4.</span> <span class="nav-text">问题</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
 
       
 
@@ -685,6 +833,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.3.0"></script>
+
+
 
   
 
